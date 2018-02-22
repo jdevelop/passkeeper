@@ -1,0 +1,9 @@
+.branding {
+    margin: 0 auto;
+    text-align: center;
+    min-width: 0;
+}
+
+.branding .title { font-family: Consolas, monaco, "Lucida Console", monospace; }
+
+.seed-name { line-height: 36px; }

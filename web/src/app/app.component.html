@@ -1,0 +1,74 @@
+<div class="modal" *ngIf="seedModal" >
+    <div class="modal-dialog" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button aria-label="Close" class="close" type="button" (click)="dismiss()">
+                    ×
+                </button>
+                <h3 class="modal-title">Seed details</h3>
+            </div>
+            <div class="modal-body">
+              <form>
+                <section class="form-block">
+                  <div class="form-group">
+                    <label for="seedId">Seed ID</label>
+                    <input #seedId type="text" id="seedId" placeholder="Seed ID" size="35" [value]="seed.seed_id">
+                  </div>
+                  <div class="form-group">
+                    <label for="seedSecret">Seed secret</label>
+                    <input #seedSecret type="text" id="seedSecret" placeholder="Seed secret" size="35" [value]="seed.seed_secret">
+                  </div>
+                </section>
+              </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" type="button" (click)="save(seedId, seedSecret)">Save</button>
+                <button class="btn btn-outline" type="button" (click)="dismiss()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop" aria-hidden="true" *ngIf="seedModal"></div>
+
+<div class="main-container">
+  <header class="header header-6">
+    <div class="branding">
+      <a href="#" class="nav-link">
+        <span class="title">⟨ passkeeper ⟩</span>
+      </a>
+    </div>
+  </header>
+  <div class="content-container">
+    <div class="content-area">
+      <h1>My seeds</h1>
+      <button class="btn btn-success" (click)="createSeed()">Add new seed</button>
+      <button class="btn btn-outline" (click)="getSeeds()">Refresh</button>
+      <table class="table" *ngIf="seeds && seeds.length > 0">
+        <thead>
+          <tr>
+            <th class="left">Seed</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let seed of seeds" >
+            <td class="left seed-name">
+              {{seed}}
+            </td>
+            <td>
+              <button class="btn btn-outline btn-sm" (click)="showSeed(seed)">View</button>
+              <button class="btn btn-danger-outline btn-sm" (click)="removeSeed(seed)">Delete</button>
+              <div *ngIf="remove.indexOf(seed) >= 0">
+                <p>Do you really want to delete "{{seed}}"?<br>
+                  <strong class="text-danger">This cannot be undone!</strong>
+                </p>
+                <button class="btn btn-danger btn-sm" (click)="removeSeed(seed, true)">Yes, delete it now!</button>
+                <button class="btn btn-outline btn-sm" (click)="cancelRemoval(seed)">Cancel</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
