@@ -30,7 +30,11 @@ func NewOLED(bus, device, width, height int) (o *OLED, err error) {
 		return
 	}
 
-	oled, err := ssd1306.NewI2C(dev, width, height, false)
+	oled, err := ssd1306.NewI2C(dev, &ssd1306.Opts{
+		W:       width,
+		H:       height,
+		Rotated: false,
+	})
 	if err != nil {
 		return
 	}

@@ -69,6 +69,7 @@ func networkUp(name string) (err error) {
 
 func dhcpUp(iface string) (cmd *exec.Cmd, err error) {
 	cmd = exec.Command("/usr/bin/dhcpd", iface)
+	//cmd = exec.Command("/usr/sbin/udhcpd")
 	err = cmd.Start()
 	return
 }

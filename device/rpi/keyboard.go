@@ -50,7 +50,7 @@ var debug = true
 
 func log(msg string, params ...interface{}) {
 	if debug {
-		fmt.Printf(msg+"\n", params)
+		fmt.Printf(msg+"\n", params...)
 	}
 }
 

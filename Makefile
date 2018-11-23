@@ -3,7 +3,7 @@ THOST ?= alarmusb
 TOS ?= linux
 TARCH ?= arm
 
-OSBUILD=GOOS=${TOS} GOARCH=${TARCH}
+OSBUILD=GOOS=${TOS} GOARCH=${TARCH} CGOENABLED=0
 
 
 all: out/service out/util
