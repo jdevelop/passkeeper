@@ -3,7 +3,6 @@
 package rpi
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"time"
@@ -13,21 +12,43 @@ import (
 	"github.com/jdevelop/passkeeper/controls"
 )
 
-type led struct {
-	standbyLedPin gpio.Pin
-	errorLedPin   gpio.Pin
-	busyLedPin    gpio.Pin
-}
+type (
+	led struct {
+		standbyLedPin gpio.Pin
+		errorLedPin   gpio.Pin
+		busyLedPin    gpio.Pin
+	}
 
-type RaspberryPi struct {
-	Led          led
-	InputControl controls.InputControl
-}
+	RaspberryPi struct {
+		Led          led
+		InputControl controls.InputControl
+	}
 
-type StackParams struct {
-	HasSerial   bool
-	HasEthernet bool
-}
+	StackParams struct {
+		HasSerial   bool
+		HasEthernet bool
+	}
+
+	Led struct {
+		standbyLedPin int
+		errorLedPin   int
+		busyLedPin    int
+	}
+
+	Control struct {
+		echoPin     int
+		moveUpPin   int
+		moveDownPin int
+	}
+
+	DisplayControl struct {
+	}
+
+	Board struct {
+		Led     Led
+		Control Control
+	}
+)
 
 func (rpi *RaspberryPi) Close() {
 	rpi.Led.busyLedPin.Close()
@@ -41,61 +62,41 @@ func (rpi *RaspberryPi) Clear() {
 	rpi.Led.standbyLedPin.Clear()
 }
 
-func (rpi *RaspberryPi) SelfCheckInprogress() (err error) {
+func (rpi *RaspberryPi) SelfCheckInprogress() error {
 	rpi.Clear()
 	rpi.Led.busyLedPin.Set()
-	return
+	return nil
 }
 
-func (rpi *RaspberryPi) SelfCheckComplete() (err error) {
+func (rpi *RaspberryPi) SelfCheckComplete() error {
 	rpi.Clear()
 	rpi.Led.standbyLedPin.Set()
-	return
+	return nil
 }
 
-func (rpi *RaspberryPi) SelfCheckFailure(reason error) (err error) {
+func (rpi *RaspberryPi) SelfCheckFailure(reason error) error {
 	rpi.Clear()
 	rpi.Led.errorLedPin.Set()
-	return
+	return nil
 }
 
-func (rpi *RaspberryPi) ReadyToTransmit() (err error) {
+func (rpi *RaspberryPi) ReadyToTransmit() error {
 	rpi.Clear()
 	rpi.Led.standbyLedPin.Set()
-	return
+	return nil
 }
 
-func (rpi *RaspberryPi) TransmissionComplete() (err error) {
+func (rpi *RaspberryPi) TransmissionComplete() error {
 	rpi.Clear()
 	rpi.Led.standbyLedPin.Set()
-	return
+	return nil
 }
 
-func (rpi *RaspberryPi) TransmissionFailure(reason error) (err error) {
-	fmt.Println("Transmission failed", reason)
+func (rpi *RaspberryPi) TransmissionFailure(reason error) error {
+	log("Transmission failed: %v", reason)
 	rpi.Clear()
 	rpi.Led.errorLedPin.Set()
-	return
-}
-
-type Led struct {
-	standbyLedPin int
-	errorLedPin   int
-	busyLedPin    int
-}
-
-type Control struct {
-	echoPin     int
-	moveUpPin   int
-	moveDownPin int
-}
-
-type DisplayControl struct {
-}
-
-type Board struct {
-	Led     Led
-	Control Control
+	return nil
 }
 
 func LedSettings(standbyLedPin, errorLedPin, busyPin int) Led {
@@ -114,44 +115,44 @@ func ControlSettings(echoPin, upPin, downPin int) Control {
 	}
 }
 
-func CreateBoard(settings Board) (rpi *RaspberryPi, err error) {
+func CreateBoard(settings Board) (*RaspberryPi, error) {
 	busyLedPin, err := rpio.OpenPin(settings.Led.busyLedPin, gpio.ModeOutput)
 	if err != nil {
-		return
+		return nil, err
 	}
 	errorLedPin, err := rpio.OpenPin(settings.Led.errorLedPin, gpio.ModeOutput)
 	if err != nil {
-		return
+		return nil, err
 	}
 	standbyLedPin, err := rpio.OpenPin(settings.Led.standbyLedPin, gpio.ModeOutput)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	preparePin := func(pinNum int) (pin gpio.Pin, pinErr error) {
-		fmt.Printf("Opening pin %d\n", pinNum)
+		log("Opening pin %d\n", pinNum)
 		pin, pinErr = rpio.OpenPin(pinNum, gpio.ModeInput)
 		if pinErr != nil {
-			return
+			return nil, err
 		}
 		pin.PullUp()
-		return
+		return nil, err
 	}
 
 	echoPin, err := preparePin(settings.Control.echoPin)
 	if err != nil {
-		return
+		return nil, err
 	}
 	upPin, err := preparePin(settings.Control.moveUpPin)
 	if err != nil {
-		return
+		return nil, err
 	}
 	downPin, err := preparePin(settings.Control.moveDownPin)
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	rpi = &RaspberryPi{
+	rpi := &RaspberryPi{
 		Led: led{
 			standbyLedPin: standbyLedPin,
 			errorLedPin:   errorLedPin,
@@ -166,7 +167,7 @@ func CreateBoard(settings Board) (rpi *RaspberryPi, err error) {
 	})
 
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	err = upPin.BeginWatch(gpio.EdgeFalling, func() {
@@ -175,7 +176,7 @@ func CreateBoard(settings Board) (rpi *RaspberryPi, err error) {
 		}
 	})
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	err = downPin.BeginWatch(gpio.EdgeFalling, func() {
@@ -184,10 +185,10 @@ func CreateBoard(settings Board) (rpi *RaspberryPi, err error) {
 		}
 	})
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	return
+	return rpi, nil
 }
 
 func InitLinuxStack(params StackParams) (*VirtualKeyboard, error) {

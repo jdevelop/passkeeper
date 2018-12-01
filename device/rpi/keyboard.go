@@ -46,7 +46,7 @@ type VirtualKeyboard struct{}
 
 var localKbd = VirtualKeyboard{}
 
-var debug = true
+var debug = false
 
 func log(msg string, params ...interface{}) {
 	if debug {

@@ -4,12 +4,12 @@ package rpi
 
 import (
 	"errors"
-	"fmt"
-	"github.com/docker/libcontainer/netlink"
 	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
+
+	"github.com/docker/libcontainer/netlink"
 )
 
 const (
@@ -39,7 +39,7 @@ func networkUp(name string) (err error) {
 	found := false
 
 	for _, _iface := range ifaces {
-		fmt.Println("Checking net ", _iface.Index, _iface.Name)
+		log("Checking net %d : %v", _iface.Index, _iface.Name)
 		if _iface.Name == name {
 			iface = _iface
 			found = true
