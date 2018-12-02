@@ -5,7 +5,6 @@ package rpi
 import (
 	"io/ioutil"
 	"os"
-	"time"
 
 	gpio "github.com/jdevelop/gpio"
 	rpio "github.com/jdevelop/gpio/rpi"
@@ -129,14 +128,14 @@ func CreateBoard(settings Board) (*RaspberryPi, error) {
 		return nil, err
 	}
 
-	preparePin := func(pinNum int) (pin gpio.Pin, pinErr error) {
+	preparePin := func(pinNum int) (gpio.Pin, error) {
 		log("Opening pin %d\n", pinNum)
-		pin, pinErr = rpio.OpenPin(pinNum, gpio.ModeInput)
-		if pinErr != nil {
+		pin, err := rpio.OpenPin(pinNum, gpio.ModeInput)
+		if err != nil {
 			return nil, err
 		}
 		pin.PullUp()
-		return nil, err
+		return pin, nil
 	}
 
 	echoPin, err := preparePin(settings.Control.echoPin)
@@ -295,7 +294,7 @@ func InitLinuxStack(params StackParams) (*VirtualKeyboard, error) {
 		return nil, err
 	}
 
-	time.Sleep(3 * time.Second)
+	//time.Sleep(1 * time.Second)
 
 	if params.HasEthernet {
 		log("Setting up ethernet")
