@@ -1,4 +1,4 @@
-package device
+package keyboard
 
 // Keyboard defines the methods to use for writing the character to the keyboard.
 type Keyboard interface {
