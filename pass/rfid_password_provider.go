@@ -1,7 +1,6 @@
 package pass
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -57,13 +56,12 @@ func NewRFIDPass(cardKey [6]byte, pwdSector, pwdBlock int) (*RFID, error) {
 }
 
 var (
-	noEdgeDetected = errors.New("No edge")
-	edgeTimeout    = 2 * time.Second
+	edgeTimeout = 2 * time.Second
 )
 
 func (r *RFID) GetCurrentPassword() ([]byte, error) {
-	if edge := r.rfid.LowLevel.WaitForEdge(edgeTimeout); !edge {
-		return nil, noEdgeDetected
+	if err := r.rfid.LowLevel.WaitForEdge(edgeTimeout); err != nil {
+		return nil, err
 	}
 	pwd, err := r.rfid.ReadCard(commands.PICC_AUTHENT1A, r.pwdSector, r.pwdBlock, r.cardKey)
 	if err != nil {
@@ -73,8 +71,8 @@ func (r *RFID) GetCurrentPassword() ([]byte, error) {
 }
 
 func (r *RFID) ResetAccessKey(newKeyArr [6]byte, sector int) error {
-	if edge := r.rfid.LowLevel.WaitForEdge(edgeTimeout); !edge {
-		return noEdgeDetected
+	if err := r.rfid.LowLevel.WaitForEdge(edgeTimeout); err != nil {
+		return err
 	}
 	fmt.Printf("Card key %v => %v\n", r.cardKey, newKeyArr)
 	return r.rfid.WriteSectorTrail(commands.PICC_AUTHENT1A, sector, newKeyArr, newKeyArr,
@@ -97,8 +95,8 @@ func (r *RFID) ResetPassword(newPassword []byte, sector, block int) error {
 		pwdArr[i] = v
 	}
 
-	if edge := r.rfid.LowLevel.WaitForEdge(edgeTimeout); !edge {
-		return noEdgeDetected
+	if err := r.rfid.LowLevel.WaitForEdge(edgeTimeout); err != nil {
+		return err
 	}
 	return r.rfid.WriteCard(commands.PICC_AUTHENT1A, sector, block, pwdArr, r.cardKey)
 }
