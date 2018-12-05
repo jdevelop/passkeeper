@@ -23,3 +23,7 @@ clean:
 
 transfer: all
 	tar -cvf - out/ | ssh ${THOST} 'tar --strip 1 -xvf -'
+
+
+card: all
+	sudo sh -c "mount /dev/mmcblk0p2 /mnt/rpi/usr && cp out/service /mnt/rpi/usr/root/service && umount /mnt/rpi/usr"
