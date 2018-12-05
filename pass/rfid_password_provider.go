@@ -1,7 +1,9 @@
 package pass
 
 import (
+	"errors"
 	"fmt"
+	"time"
 
 	"periph.io/x/periph/conn/gpio/gpioreg"
 	"periph.io/x/periph/conn/spi/spireg"
@@ -54,7 +56,15 @@ func NewRFIDPass(cardKey [6]byte, pwdSector, pwdBlock int) (*RFID, error) {
 	}, nil
 }
 
+var (
+	noEdgeDetected = errors.New("No edge")
+	edgeTimeout    = 2 * time.Second
+)
+
 func (r *RFID) GetCurrentPassword() ([]byte, error) {
+	if edge := r.rfid.LowLevel.WaitForEdge(edgeTimeout); !edge {
+		return nil, noEdgeDetected
+	}
 	pwd, err := r.rfid.ReadCard(commands.PICC_AUTHENT1A, r.pwdSector, r.pwdBlock, r.cardKey)
 	if err != nil {
 		return nil, err
@@ -63,6 +73,10 @@ func (r *RFID) GetCurrentPassword() ([]byte, error) {
 }
 
 func (r *RFID) ResetAccessKey(newKeyArr [6]byte, sector int) error {
+	if edge := r.rfid.LowLevel.WaitForEdge(edgeTimeout); !edge {
+		return noEdgeDetected
+	}
+	fmt.Printf("Card key %v => %v\n", r.cardKey, newKeyArr)
 	return r.rfid.WriteSectorTrail(commands.PICC_AUTHENT1A, sector, newKeyArr, newKeyArr,
 		&mfrc522.BlocksAccess{
 			B0: mfrc522.AnyKeyRWID,
@@ -83,6 +97,9 @@ func (r *RFID) ResetPassword(newPassword []byte, sector, block int) error {
 		pwdArr[i] = v
 	}
 
+	if edge := r.rfid.LowLevel.WaitForEdge(edgeTimeout); !edge {
+		return noEdgeDetected
+	}
 	return r.rfid.WriteCard(commands.PICC_AUTHENT1A, sector, block, pwdArr, r.cardKey)
 }
 
