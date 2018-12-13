@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os/user"
+	"path/filepath"
 
 	"github.com/gorilla/mux"
 	"github.com/jdevelop/passkeeper"
@@ -157,7 +159,16 @@ func Start(host string, port int, s storageCombined, changeCallback func()) {
 	rtr.HandleFunc("/api/seed", wrapper(srv.loadSeed)).Methods("GET")
 	rtr.HandleFunc("/api/seed", wrapper(srv.removeSeed)).Methods("DELETE")
 
-	fs := http.FileServer(http.Dir("/home/alarm/web"))
+	var staticPath string
+
+	u, err := user.Current()
+	if err != nil {
+		staticPath = "/root/web"
+	} else {
+		staticPath = filepath.Join(u.HomeDir, "web")
+	}
+
+	fs := http.FileServer(http.Dir(staticPath))
 	rtr.PathPrefix("/").Handler(fs)
 
 	http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), rtr)
