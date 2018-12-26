@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os/user"
-	"path/filepath"
 
+	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
 	"github.com/jdevelop/passkeeper"
 	"github.com/jdevelop/passkeeper/storage"
@@ -159,16 +158,9 @@ func Start(host string, port int, s storageCombined, changeCallback func()) {
 	rtr.HandleFunc("/api/seed", wrapper(srv.loadSeed)).Methods("GET")
 	rtr.HandleFunc("/api/seed", wrapper(srv.removeSeed)).Methods("DELETE")
 
-	var staticPath string
+	box := packr.NewBox("../web")
 
-	u, err := user.Current()
-	if err != nil {
-		staticPath = "/root/web"
-	} else {
-		staticPath = filepath.Join(u.HomeDir, "web")
-	}
-
-	fs := http.FileServer(http.Dir(staticPath))
+	fs := http.FileServer(box)
 	rtr.PathPrefix("/").Handler(fs)
 
 	http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), rtr)
