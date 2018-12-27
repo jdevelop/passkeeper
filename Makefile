@@ -1,5 +1,5 @@
 STRIP=-ldflags '-s -w'
-THOST ?= alarmusb
+THOST ?= root@alarmusb
 TOS ?= linux
 TARCH ?= arm
 
