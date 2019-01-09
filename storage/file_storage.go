@@ -3,8 +3,11 @@ package storage
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/jdevelop/passkeeper"
 )
@@ -33,7 +36,7 @@ func readSeeds(s *PlainText) ([]passkeeper.Seed, error) {
 	}
 
 	if len(bytes) == 0 {
-		return nil, fmt.Errorf("empty storage content")
+		return make([]passkeeper.Seed, 0), nil
 	}
 
 	pt, err := decrypt([]byte(s.key), bytes)
@@ -88,6 +91,28 @@ func (s *PlainText) RemoveSeed(key string) error {
 	return fmt.Errorf("cant find seed for %s", key)
 }
 
+func backupFile(src *os.File) (_ string, err error) {
+	if _, err := src.Seek(0, 0); err != nil {
+		return "", err
+	}
+	parentDir := filepath.Dir(src.Name())
+	currentFile := filepath.Base(src.Name())
+	newFile := fmt.Sprintf("%s.%d", filepath.Join(parentDir, currentFile), time.Now().Unix())
+	dst, err := os.OpenFile(newFile, os.O_CREATE|os.O_RDWR, 0600)
+	defer func() {
+		if err == nil {
+			err = dst.Close()
+		} else {
+			dst.Close()
+		}
+	}()
+	if err != nil {
+		return "", err
+	}
+	_, err = io.Copy(dst, src)
+	return newFile, err
+}
+
 func (s *PlainText) writeSeedsToFile(seeds []passkeeper.Seed) error {
 	bytes, err := json.Marshal(seeds)
 	if err != nil {
@@ -99,7 +124,13 @@ func (s *PlainText) writeSeedsToFile(seeds []passkeeper.Seed) error {
 		return err
 	}
 
-	s.file.Truncate(0)
+	if name, err := backupFile(s.file); err != nil {
+		return fmt.Errorf("Can't backup file '%s' : %v", name, err)
+	}
+
+	if err := s.file.Truncate(0); err != nil {
+		return err
+	}
 	_, err = s.file.WriteAt(enc, 0)
 	if err != nil {
 		return err

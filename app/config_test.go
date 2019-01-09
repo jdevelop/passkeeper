@@ -42,7 +42,7 @@ func TestConfigLoad(t *testing.T) {
 		t.Errorf("Expected access sector 100501, was %d", c.Rfid.RfidAccessSector)
 	}
 
-	if !reflect.DeepEqual(c.Rfid.RfidAccessKey, newKey[:]) {
-		t.Errorf("Keys are not equal")
+	if !reflect.DeepEqual(c.Rfid.RfidAccessKey, newKey) {
+		t.Errorf("Keys are not equal: %v != %v", c.Rfid.RfidAccessKey, newKey)
 	}
 }
