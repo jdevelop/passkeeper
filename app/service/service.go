@@ -3,9 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"github.com/jdevelop/passkeeper/app"
 	"github.com/jdevelop/passkeeper/app/service/support"
-	"github.com/jdevelop/passkeeper/controls"
+	"github.com/jdevelop/passkeeper/controls/status"
 	"github.com/jdevelop/passkeeper/device/rpi"
 	"github.com/jdevelop/passkeeper/device/rpi/display"
 	"github.com/jdevelop/passkeeper/device/rpi/display/lcd"
@@ -13,11 +17,8 @@ import (
 	"github.com/jdevelop/passkeeper/pass"
 	"github.com/jdevelop/passkeeper/rest"
 	"github.com/jdevelop/passkeeper/storage"
-	"gopkg.in/alecthomas/kingpin.v2"
-	"log"
-	"os"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	"periph.io/x/periph/host"
-	"time"
 )
 
 var (
@@ -219,7 +220,7 @@ func main() {
 	})
 }
 
-func GetCurrentPassword(provider pass.PasswordProvider, board controls.StatusControl) ([]byte, error) {
+func GetCurrentPassword(provider pass.PasswordProvider, board status.StatusControl) ([]byte, error) {
 	pwd, err := provider.GetCurrentPassword()
 	if err != nil {
 		board.SelfCheckFailure(err)
