@@ -76,6 +76,11 @@ func main() {
 		Control: rpi.ControlSettings(c.Keys.Send, c.Keys.Up, c.Keys.Down),
 	})
 
+	if err != nil {
+		db.Log("Can't create board")
+		log.Fatal(err)
+	}
+
 	db.Log("Selfcheck")
 	raspberry.SelfCheckInprogress()
 

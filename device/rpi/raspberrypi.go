@@ -43,14 +43,15 @@ type (
 		moveDownPin int
 	}
 
-	DisplayControl struct {
-	}
-
 	Board struct {
 		Led     Led
 		Control Control
 	}
 )
+
+func (rpi *RaspberryPi) String() string {
+	return "BOARD"
+}
 
 func (rpi *RaspberryPi) Close() {
 	rpi.Led.busyLedPin.Halt()
@@ -138,7 +139,7 @@ func CreateBoard(settings Board) (*RaspberryPi, error) {
 	preparePin := func(pinNum int) (gpio.PinIn, error) {
 		log("Opening pin %d\n", pinNum)
 		pin := gpioreg.ByName(bcmpin(pinNum))
-		if pin != nil {
+		if pin == nil {
 			return nil, wrapf("can't find input pin %d", pinNum)
 		}
 		if err := pin.In(gpio.PullUp, gpio.FallingEdge); err != nil {
@@ -167,6 +168,8 @@ func CreateBoard(settings Board) (*RaspberryPi, error) {
 			busyLedPin:    busyLedPin,
 		},
 	}
+
+	log("Board settings: %s", rpi.String())
 
 	mainloop := make(chan struct{})
 
