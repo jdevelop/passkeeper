@@ -7,13 +7,15 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"os/exec"
 
 	"github.com/docker/libcontainer/netlink"
+	"github.com/jdevelop/passkeeper/dhcpsrv"
 )
 
 const (
-	usbEthernet = usbGadget + "/functions/ecm.usb0"
+	usbEthernet   = usbGadget + "/functions/ecm.usb0"
+	localIPStr    = "10.101.1.1"
+	leaseStartStr = "10.101.1.2"
 )
 
 var localIP = net.ParseIP("10.101.1.1")
@@ -67,9 +69,7 @@ func networkUp(name string) (err error) {
 
 }
 
-func dhcpUp(iface string) (cmd *exec.Cmd, err error) {
-	cmd = exec.Command("/usr/bin/dhcpd", iface)
-	//cmd = exec.Command("/usr/sbin/udhcpd")
-	err = cmd.Start()
-	return
+func dhcpUp(iface, localIP, leaseStart string) error {
+	dhcpsrv.StartDHCP(dhcpsrv.IFace(iface), dhcpsrv.IP(localIP), dhcpsrv.LeaseStart(leaseStart))
+	return nil
 }

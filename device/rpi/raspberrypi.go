@@ -310,9 +310,12 @@ func InitLinuxStack(params StackParams) (*VirtualKeyboard, error) {
 		}
 
 		log("Init DHCP")
-		if _, err = dhcpUp("usb0"); err != nil {
-			return nil, err
-		}
+		go func() {
+			err := dhcpUp("usb0", localIPStr, leaseStartStr)
+			if err != nil {
+				log("Can't start DHCP server %v", err)
+			}
+		}()
 	}
 
 	return &localKbd, nil
