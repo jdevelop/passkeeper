@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Start logging
+#
+
+
+start() {
+	/root/splash
+}
+
+
+case "$1" in
+  start)
+	start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|reload}"
+	exit 1
+esac
+
+exit $?

@@ -5,8 +5,12 @@ TARCH ?= arm
 
 OSBUILD=GOOS=${TOS} GOARCH=${TARCH} CGOENABLED=0
 
+PHONY: packr
 
-all: upx
+all: packr upx
+
+packr:
+	packr
 
 out/service:
 	${OSBUILD} go build ${STRIP} -o out/service app/service/*.go
@@ -14,11 +18,16 @@ out/service:
 out/util:
 	${OSBUILD} go build ${STRIP} -o out/util app/util/*.go
 
-upx: out/service out/util
-	upx out/service && \
+out/splash:
+	${OSBUILD} go build ${STRIP} -o out/splash app/splash/*.go
+
+upx: out/service out/util out/splash
+	upx out/service
 	upx out/util
+	upx out/splash
 
 clean:
+	packr clean
 	rm -f out/*
 
 transfer: all
