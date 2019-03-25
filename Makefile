@@ -4,6 +4,8 @@ TOS ?= linux
 TARCH ?= arm
 
 OSBUILD=GOOS=${TOS} GOARCH=${TARCH} CGOENABLED=0
+OUT=buildroot/board/rootfs_overlay/root
+EXECS=service util splash
 
 PHONY: packr
 
@@ -13,22 +15,22 @@ packr:
 	packr
 
 out/service:
-	${OSBUILD} go build ${STRIP} -o out/service app/service/*.go
+	${OSBUILD} go build ${STRIP} -o ${OUT}/service app/service/*.go
 
 out/util:
-	${OSBUILD} go build ${STRIP} -o out/util app/util/*.go
+	${OSBUILD} go build ${STRIP} -o ${OUT}/util app/util/*.go
 
 out/splash:
-	${OSBUILD} go build ${STRIP} -o out/splash app/splash/*.go
+	${OSBUILD} go build ${STRIP} -o ${OUT}/splash app/splash/*.go
 
 upx: out/service out/util out/splash
-	upx out/service
-	upx out/util
-	upx out/splash
+	upx ${OUT}/service
+	upx ${OUT}/util
+	upx ${OUT}/splash
 
 clean:
 	packr clean
-	rm -f out/*
+	rm -f $(addprefix $(OUT)/, $(EXECS))
 
 transfer: all
 	tar -cvf - out/ | ssh ${THOST} 'tar --strip 1 -xvf -'
