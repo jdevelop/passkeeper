@@ -1,0 +1,131 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:test-cad-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date "2017-05-06"
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L LCD16X2 DS?
+U 1 1 590E7D4B
+P 2650 1100
+F 0 "DS?" H 1850 1500 50  0000 C CNN
+F 1 "LCD16X2" H 3350 1500 50  0000 C CNN
+F 2 "WC1602A" H 2650 1050 50  0001 C CIN
+F 3 "" H 2650 1100 50  0001 C CNN
+	1    2650 1100
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_02X11 J?
+U 1 1 590E7E8B
+P 2400 2350
+F 0 "J?" H 2400 2950 50  0000 C CNN
+F 1 "CONN_02X11" V 2400 2350 50  0000 C CNN
+F 2 "" H 2400 1150 50  0001 C CNN
+F 3 "" H 2400 1150 50  0001 C CNN
+	1    2400 2350
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	3400 1950 3400 1600
+Wire Wire Line
+	1900 1950 3400 1950
+Wire Wire Line
+	1900 1600 1900 1950
+Wire Wire Line
+	1900 1950 1900 2100
+Wire Wire Line
+	2300 1950 2300 1600
+Connection ~ 1900 1950
+Wire Wire Line
+	2000 1600 2000 2000
+Wire Wire Line
+	2000 2000 2000 2100
+Wire Wire Line
+	2200 1600 2200 2100
+Wire Wire Line
+	2400 1600 2400 2100
+Wire Wire Line
+	3300 2000 3300 1600
+Wire Wire Line
+	1600 2000 2000 2000
+Wire Wire Line
+	2000 2000 3300 2000
+Connection ~ 2000 2000
+Wire Wire Line
+	3200 1600 3200 2100
+Wire Wire Line
+	3200 2100 2900 2100
+Wire Wire Line
+	3100 1600 3100 2050
+Wire Wire Line
+	3100 2050 2800 2050
+Wire Wire Line
+	2800 2050 2800 2100
+Wire Wire Line
+	3000 1600 3000 1900
+Wire Wire Line
+	3000 1900 2700 1900
+Wire Wire Line
+	2700 1900 2700 2100
+Wire Wire Line
+	2900 1600 2900 1850
+Wire Wire Line
+	2900 1850 2600 1850
+Wire Wire Line
+	2600 1850 2600 2100
+$Comp
+L R R?
+U 1 1 5910552A
+P 1600 1850
+F 0 "R?" V 1680 1850 50  0000 C CNN
+F 1 "R" V 1600 1850 50  0000 C CNN
+F 2 "" V 1530 1850 50  0001 C CNN
+F 3 "" H 1600 1850 50  0001 C CNN
+	1    1600 1850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2100 1600 2100 1700
+Wire Wire Line
+	2100 1700 1600 1700
+$EndSCHEMATC
