@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/jdevelop/passkeeper"
+	"github.com/jdevelop/passkeeper/firmware"
 )
 
 type PlainText struct {

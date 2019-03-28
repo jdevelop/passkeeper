@@ -2,7 +2,7 @@ package support
 
 import (
 	"fmt"
-	"github.com/jdevelop/passkeeper/device/rpi/display"
+	"github.com/jdevelop/passkeeper/firmware/device/rpi/display"
 )
 
 type dashboard struct {

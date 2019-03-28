@@ -8,8 +8,8 @@ import (
 
 	"github.com/gobuffalo/packr"
 	"github.com/gorilla/mux"
-	"github.com/jdevelop/passkeeper"
-	"github.com/jdevelop/passkeeper/storage"
+	"github.com/jdevelop/passkeeper/firmware"
+	"github.com/jdevelop/passkeeper/firmware/storage"
 )
 
 type storageCombined interface {
@@ -158,7 +158,7 @@ func Start(host string, port int, s storageCombined, changeCallback func()) {
 	rtr.HandleFunc("/api/seed", wrapper(srv.loadSeed)).Methods("GET")
 	rtr.HandleFunc("/api/seed", wrapper(srv.removeSeed)).Methods("DELETE")
 
-	box := packr.NewBox("../web")
+	box := packr.NewBox("../../web")
 
 	fs := http.FileServer(box)
 	rtr.PathPrefix("/").Handler(fs)

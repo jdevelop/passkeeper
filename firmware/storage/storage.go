@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/jdevelop/passkeeper"
+	"github.com/jdevelop/passkeeper/firmware"
 )
 
 type SeedStorageRead interface {

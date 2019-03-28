@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/docker/libcontainer/netlink"
-	"github.com/jdevelop/passkeeper/dhcpsrv"
+	"github.com/jdevelop/passkeeper/firmware/dhcpsrv"
 )
 
 const (

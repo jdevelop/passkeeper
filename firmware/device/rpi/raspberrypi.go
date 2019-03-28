@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/jdevelop/passkeeper/controls/input"
+	"github.com/jdevelop/passkeeper/firmware/controls/input"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/conn/gpio/gpioreg"
 )
