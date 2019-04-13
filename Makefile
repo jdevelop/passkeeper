@@ -1,5 +1,11 @@
+.PHONY: web
 
-all:
+web:
+	docker pull node:11-alpine
+	docker run --rm -v $(PWD)/web:/works -w /works -u node node:11-alpine npm install
+	docker run --rm -v $(PWD)/web:/works -w /works -u node node:11-alpine npm run build
+
+all: 	web
 	$(MAKE) -C firmware clean all
 
 linux: 

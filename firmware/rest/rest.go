@@ -158,7 +158,7 @@ func Start(host string, port int, s storageCombined, changeCallback func()) {
 	rtr.HandleFunc("/api/seed", wrapper(srv.loadSeed)).Methods("GET")
 	rtr.HandleFunc("/api/seed", wrapper(srv.removeSeed)).Methods("DELETE")
 
-	box := packr.NewBox("../../web")
+	box := packr.NewBox("../../web/dist/")
 
 	fs := http.FileServer(box)
 	rtr.PathPrefix("/").Handler(fs)
