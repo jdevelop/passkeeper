@@ -4,7 +4,7 @@ all: 	web firmware
 
 firmware:
 	docker pull golang:1.12-alpine
-	docker run --rm -v $(PWD):/go -w /go golang:1.12-alpine /bin/sh -c 'apk add make git upx && make -C firmware clean all'
+	docker run --rm -v $(PWD):/tmp/dev -w /tmp/dev golang:1.12-alpine /bin/sh -c 'apk add make git upx && make -C firmware clean all'
 
 web:
 	docker pull node:11-alpine
