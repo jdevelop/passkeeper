@@ -9,7 +9,7 @@ all: 	web
 	$(MAKE) -C firmware clean all
 
 linux: 
-	ifndef BUILDROOT
+ifndef BUILDROOT
 	$(error BUILDROOT is not set)
-	endif
+endif
 	$(MAKE) O=$(PWD)/buildroot PASSKEEPER=$(PWD)/buildroot -C $(BUILDROOT)
