@@ -6,11 +6,11 @@ OSBUILD=GOOS=${TOS} GOARCH=${TARCH} CGOENABLED=0
 OUT=../buildroot/board/rootfs_overlay/root
 EXECS=service util splash
 
-PHONY: packr
+PHONY: packr packr-dep
 
 all: packr upx
 
-packr:
+packr: packr-dep
 	packr
 
 ${OUT}/service:
@@ -22,11 +22,14 @@ ${OUT}/util:
 ${OUT}/splash:
 	${OSBUILD} go build ${STRIP} -o ${OUT}/splash app/splash/*.go
 
+packr-dep:
+	go get -u github.com/gobuffalo/packr/packr
+
 upx: ${OUT}/service ${OUT}/util ${OUT}/splash
 	upx ${OUT}/service
 	upx ${OUT}/util
 	upx ${OUT}/splash
 
-clean:
+clean: packr-dep
 	packr clean
 	rm -f $(addprefix $(OUT)/, $(EXECS))
