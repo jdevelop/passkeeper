@@ -88,3 +88,42 @@ will build the web interface, services and will invoke buildroot to produce the 
 ```
 dd if=buildroot/images/sdcard.img of=/dev/sda bs=1M
 ```
+
+# Usage
+
+Once the device is assembled, you will need to plug it into the USB port of your computer/laptop. 
+
+When you'll see the prompt on OLED display ( and yellow LED will be lit )- insert the FOB into the device to unlock the encrypted internal storage.
+
+**Make sure that you use proper data cable - not just charging cable!**. The cable has to be inserted into the **data** port on the device itself, otherwise the device won't be able to communicate with the computer properly.
+
+![Device](images/screenshots/PassKeeper.png) 
+
+The device will register itself as a network interface in the computer/laptop and will be accessible at **[http://10.101.1.1](http://10.101.1.1)**
+
+### Add/update password
+Initially there will be no passwords ( for some reason we called them seeds ) configure, so you will be able to add your own:
+
+![Add seed](images/screenshots/PassKeeper-AddSeed.png)
+
+### View passwords / dashboard
+
+The dashboard shows the list of the passwords stored in the device:
+
+![Add seed](images/screenshots/PassKeeper-Dashboard.png)
+
+
+# Roadmap
+
+## Software / UI 
+* Add backup/restore options for the password storage
+* Add password generation
+* Add more keys to the same device that will unlock partial storage, so it will be possible to share the device between users.
+
+## Hardware
+* Improve the design of the case, make it more ergonomic.
+* Design [PCB](https://en.wikipedia.org/wiki/Printed_circuit_board) for easy assembling.
+
+# Contact
+
+Please feel free to [contact us](https://forms.gle/r6L1QsXPWsKD5iBB6) if you'd get any questions or comments.
