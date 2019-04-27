@@ -127,3 +127,7 @@ The dashboard shows the list of the passwords stored in the device:
 # Contact
 
 Please feel free to [contact us](https://forms.gle/r6L1QsXPWsKD5iBB6) if you'd get any questions or comments.
+
+# Project updates
+
+If you want to keep in touch and get some news / updates / new feature announcements - please [subscribe here](https://forms.gle/FqkYDQtQowCpkGfk6). **We are not going to share your e-mail address anywhere with anyone**
