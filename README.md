@@ -5,7 +5,7 @@
 * [Maxim](https://github.com/maximcamario)
 
 ## Objective
-The goal of the project is to create the easy to build and use device that allows to store virtually unlimited number of passwords on AES encrypted storage. The storage is encrypted with AES and uses the password that is stored on the RFID FOB key.
+The goal of this project is to create an advanced encryption storage device that is easy to use and build. This device will allow users to store an unlimited number of passwords which can be accessed using an RFID key fob.
 
 The project consists of
 
@@ -45,7 +45,7 @@ The wiring is pretty simple, just make sure you have **at least 2 inches ( 5 cm 
 
 ### Case
 
-The case can be 3D printed using any PLA filament. The STL models are provided in the [/case/stl/](/case/stl/) folder. Having layers height of 0.15 mm should work, some may try 0.20 for quick print or go thinner for smoother surfaces. 
+The case can be 3D printed using any PLA filament. The *.STL* models are provided in the [/case/stl/](/case/stl) folder. Using a layer height of 0.15 mm should work, you can try 0.20 for a quick print or go thinner for smoother surfaces.
 
 ![Case](images/case-model.png)
 
@@ -72,7 +72,7 @@ The application consists of 2 components:
     * oled splash
 * web interface ( AngularJS )
 
-These components can be build separately:
+These components can be built separately:
 
 * `make web` - builds the web interface.
     The application embeds the WEB interface into itself, hence `make web` has to be invoked first, in order to produce all necessary artifacts.
@@ -93,7 +93,7 @@ dd if=buildroot/images/sdcard.img of=/dev/sda bs=1M
 
 Once the device is assembled, you will need to plug it into the USB port of your computer/laptop. 
 
-When you'll see the prompt on OLED display ( and yellow LED will be lit )- insert the FOB into the device to unlock the encrypted internal storage.
+When you see the prompt on OLED display ( yellow LED will be lit )- insert the FOB into the device to unlock the encrypted internal storage.
 
 **Make sure that you use proper data cable - not just charging cable!**. The cable has to be inserted into the **data** port on the device itself, otherwise the device won't be able to communicate with the computer properly.
 
