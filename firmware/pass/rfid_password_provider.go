@@ -23,8 +23,10 @@ var ZeroKey = [...]byte{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
 var defaultKey = [...]byte{0xca, 0xfe, 0xba, 0xbe, 0, 0}
 
 const (
-	resetPinStr = "13"
-	irqPinStr   = "12"
+	//resetPinStr = "13"
+	//irqPinStr   = "12"
+	resetPinStr = "27"
+	irqPinStr   = "17"
 )
 
 func NewRFIDPass(cardKey [6]byte, pwdSector, pwdBlock int) (*RFID, error) {
