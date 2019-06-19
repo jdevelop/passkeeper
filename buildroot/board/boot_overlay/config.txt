@@ -16,7 +16,7 @@ disable_overscan=1
 # How much memory in MB to assign to the GPU on Pi models having
 # 256, 512 or 1024 MB total memory
 gpu_mem=64
-dtoverlay=dwc2
+dtoverlay=dwc2,i2c-rtc,ds3231
 dtparam=i2c_arm=on
 dtparam=i2c_arm_baudrate=1000000
 dtparam=spi=on
