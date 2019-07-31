@@ -24,9 +24,7 @@ func StartDHCP(iface IFace, ip IP, start LeaseStart) error {
 		leaseRange:    2,
 		leases:        make(map[int]lease, 2),
 		options: dhcp.Options{
-			dhcp.OptionSubnetMask:       []byte{255, 255, 255, 0},
-			dhcp.OptionRouter:           []byte(serverIP), // Presuming Server is also your router
-			dhcp.OptionDomainNameServer: []byte(serverIP), // Presuming Server is also your DNS server
+			dhcp.OptionSubnetMask: []byte{255, 255, 255, 0},
 		},
 	}
 	return dhcp.ListenAndServeIf(string(iface), handler)

@@ -3,6 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
+	"os"
+	"syscall"
+
+	"github.com/google/uuid"
 	"github.com/jdevelop/passkeeper/firmware"
 	"github.com/jdevelop/passkeeper/firmware/app"
 	"github.com/jdevelop/passkeeper/firmware/device/rpi"
@@ -10,26 +15,23 @@ import (
 	"github.com/jdevelop/passkeeper/firmware/storage"
 	"golang.org/x/crypto/ssh/terminal"
 	"gopkg.in/alecthomas/kingpin.v2"
-	"log"
-	"os"
 	"periph.io/x/periph/host"
-	"syscall"
 )
 
 var (
-	cli = kingpin.New("util", "The utility application for seed management")
+	cli = kingpin.New("util", "The utility application for password management")
 
 	mode = cli.Flag("mode", "Storage password source (card or manual entry)").
 		Default("card").Enum("term", "card")
 
 	config = cli.Flag("config", "Path to the config file").String()
 
-	listCmd = cli.Command("list", "List available seeds")
+	listCmd = cli.Command("list", "List available passwords")
 
-	addCmd = cli.Command("add", "Add new seed")
+	addCmd = cli.Command("add", "Add new password")
 
-	delCmd   = cli.Command("remove", "Remove seed by name")
-	seedName = delCmd.Arg("id", "Seed id").Required().String()
+	delCmd     = cli.Command("remove", "Remove password by ID")
+	passwordId = delCmd.Arg("id", "Password id").Required().String()
 
 	echoCmd    = cli.Command("echo", "Echo string to keyboard")
 	echoString = echoCmd.Arg("text", "Text to echo").Required().String()
@@ -89,7 +91,7 @@ func main() {
 			fmt.Println("Password read successfully")
 		}
 
-		strg, err := storage.NewPlainText(c.Seeds.SeedFile, cardPassword)
+		strg, err := storage.NewPlainText(c.Passwords.PasswordFile, cardPassword)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -99,7 +101,7 @@ func main() {
 	switch cmdAlias {
 	case listCmd.FullCommand():
 		strg := openStorage()
-		seeds, err := strg.ListSeeds()
+		seeds, err := strg.ListCredentials()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -116,21 +118,22 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Println("Seed:")
-		seed1, err := terminal.ReadPassword(syscall.Stdin)
+		password, err := terminal.ReadPassword(syscall.Stdin)
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("Confirm seed:")
-		seed2, err := terminal.ReadPassword(syscall.Stdin)
+		confirm, err := terminal.ReadPassword(syscall.Stdin)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if string(seed1) != string(seed2) {
+		if string(password) != string(confirm) {
 			log.Fatalln("Seeds do not match, aborting")
 		}
-		err = strg.SaveSeed(passkeeper.Seed{
-			SeedId:     string(seedName),
-			SeedSecret: string(seed1),
+		err = strg.WriteCredentials(firmware.Credentials{
+			Id:      uuid.New().String(),
+			Service: string(seedName),
+			Secret:  string(password),
 		})
 		if err != nil {
 			log.Fatal(err)
@@ -207,7 +210,7 @@ func main() {
 
 	case delCmd.FullCommand():
 		strg := openStorage()
-		if err := strg.RemoveSeed(*seedName); err != nil {
+		if err := strg.RemoveCredentials(*passwordId); err != nil {
 			log.Fatal(err)
 		}
 

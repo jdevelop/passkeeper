@@ -1,18 +1,29 @@
-A simple Web UI for passkeeper
-============
+# passkeeper
 
-Getting started
-----------------------------------
-
-#### Installation
-
-```bash
-# install the project's dependencies
+## Project setup
+```
 npm install
+```
 
-# starts the application in dev mode and watches your files for livereload
-npm start
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
 
-# builds the application
+### Compiles and minifies for production
+```
 npm run build
 ```
+
+### Run your tests
+```
+npm run test
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).

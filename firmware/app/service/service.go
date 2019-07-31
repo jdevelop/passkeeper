@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/jdevelop/passkeeper/firmware"
 	"github.com/jdevelop/passkeeper/firmware/app"
 	"github.com/jdevelop/passkeeper/firmware/app/service/support"
 	"github.com/jdevelop/passkeeper/firmware/controls/status"
@@ -29,7 +30,7 @@ var (
 
 var currentSeedID = 0
 
-var currentSeeds []string
+var currentSeeds []firmware.Credentials
 
 func main() {
 
@@ -124,14 +125,14 @@ func main() {
 
 	raspberry.ReadyToTransmit()
 
-	seedStorage, err := getStorage(c.Seeds.SeedFile, pass)
+	seedStorage, err := getStorage(c.Passwords.PasswordFile, pass)
 
 	if err != nil {
 		db.Log("Storage failed")
 		log.Fatal(err)
 	}
 
-	currentSeeds, err = seedStorage.ListSeeds()
+	currentSeeds, err = seedStorage.ListCredentials()
 	if err != nil {
 		db.Log("Seed failed")
 		log.Fatal(err)
@@ -160,7 +161,7 @@ func main() {
 				return
 			}
 			raspberry.ReadyToTransmit()
-			seeds, err := seedStorage.ListSeeds()
+			seeds, err := seedStorage.ListCredentials()
 			if err != nil {
 				return
 			}
@@ -177,13 +178,13 @@ func main() {
 			if currentSeedID < 0 {
 				currentSeedID = 0
 			}
-			seed, err := seedStorage.LoadSeed(seeds[currentSeedID])
+			seed, err := seedStorage.ReadCredentials(seeds[currentSeedID].Id)
 			if err != nil {
 				db.Log("Storage failed")
 				raspberry.TransmissionFailure(err)
 				return
 			}
-			err = drv.WriteString(seed.SeedSecret)
+			err = drv.WriteString(seed.Secret)
 			if err != nil {
 				db.Log("Keyboard failed")
 				raspberry.TransmissionFailure(err)
@@ -220,7 +221,7 @@ func main() {
 
 	rest.Start("0.0.0.0", 80, seedStorage, func() {
 		currentSeedID = 0
-		currentSeeds, err = seedStorage.ListSeeds()
+		currentSeeds, err = seedStorage.ListCredentials()
 		textDisplay.Refresh()
 	})
 }

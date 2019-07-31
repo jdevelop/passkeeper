@@ -21,8 +21,8 @@ type keys struct {
 	Down int `json:"key_down"`
 }
 
-type seeds struct {
-	SeedFile string `json:"file"`
+type passwords struct {
+	PasswordFile string `json:"file"`
 }
 
 type rfid struct {
@@ -45,12 +45,12 @@ type oled struct {
 }
 
 type Config struct {
-	Leds  leds  `json:"leds"`
-	Keys  keys  `json:"keys"`
-	Seeds seeds `json:"seeds"`
-	Rfid  rfid  `json:"rfid"`
-	LCD   lcd   `json:"lcd"`
-	OLED  oled  `json:"oled"`
+	Leds      leds      `json:"leds"`
+	Keys      keys      `json:"keys"`
+	Passwords passwords `json:"passwords"`
+	Rfid      rfid      `json:"rfid"`
+	LCD       lcd       `json:"lcd"`
+	OLED      oled      `json:"oled"`
 }
 
 var DefaultConfig = Config{
@@ -64,8 +64,8 @@ var DefaultConfig = Config{
 		Down: 5,
 		Up:   6,
 	},
-	Seeds: seeds{
-		SeedFile: "/root/seedstorage.enc",
+	Passwords: passwords{
+		PasswordFile: "/root/passwordstorage.enc",
 	},
 	Rfid: rfid{
 		RfidAccessBlock:  1,
