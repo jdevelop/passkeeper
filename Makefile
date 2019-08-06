@@ -4,12 +4,9 @@ USERID ?= \\\#1000
 all: 	web firmware
 
 firmware:
-	docker build -t passkeeperbuid:latest docker/golang-build
-	docker run --rm -e HOME=/tmp/dev -v $(PWD):/tmp/dev -w /tmp/dev passkeeperbuid:latest /bin/sh -c 'make -C firmware clean all'
-	docker rmi passkeeperbuid:latest
+	docker run --rm -e HOME=/tmp/dev -v $(PWD):/tmp/dev -w /tmp/dev jdevelop/passkeeperbuild:1.12-alpine /bin/sh -c 'make -C firmware clean all'
 
 web:
-	docker pull node:11-alpine
 	docker run --rm -u ${USERID} -v $(PWD)/web:/works -w /works -u node node:11-alpine npm install
 	docker run --rm -u ${USERID} -v $(PWD)/web:/works -w /works -u node node:11-alpine npm run build
 
