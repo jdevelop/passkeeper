@@ -1,9 +1,11 @@
 export const Model = {
-  Password: () => {
+  Credentials: () => {
     return {
-      name: "",
-      password: "",
-      confirmation: ""
+      id: "",
+      service: "",
+      secret: "",
+      confirm: "",
+      comment: ""
     };
   }
 };

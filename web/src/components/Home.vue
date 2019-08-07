@@ -39,6 +39,7 @@
     >
       <b-form>
         <b-form-group id="input-group-1" label-for="input-1" description="Password service">
+          <b-alert variant="danger" :show="modalErrors.serviceField">{{ modalErrors.serviceField }}</b-alert>
           <b-form-input
             id="input-1"
             type="email"
@@ -49,6 +50,10 @@
         </b-form-group>
 
         <b-form-group id="input-group-2" description="Password" label-for="input-2">
+          <b-alert
+            variant="danger"
+            :show="modalErrors.passwordField"
+          >{{ modalErrors.passwordField }}</b-alert>
           <b-form-input
             id="input-2"
             type="password"
@@ -59,6 +64,7 @@
         </b-form-group>
 
         <b-form-group id="input-group-3" description="Confirm password" label-for="input-3">
+          <b-alert variant="danger" :show="modalErrors.confirmField">{{ modalErrors.confirmField }}</b-alert>
           <b-form-input
             id="input-3"
             type="password"
@@ -83,6 +89,7 @@
 
 <script>
 import { REST } from "@/js/restapi.js";
+import { Model } from "@/js/models.js";
 const columnNames = [
   {
     key: "service",
@@ -115,28 +122,33 @@ export default {
   },
   data() {
     return {
-      credentials: {
-        id: "",
-        service: "svc",
-        secret: "password",
-        confirm: "password",
-        comment: "comment"
-      },
+      modalErrors: {},
+      credentials: Model.Credentials(),
       fields: columnNames,
       items: []
     };
   },
   methods: {
-    saveCredentials() {
+    saveCredentials(bvModalEvt) {
       const t = this;
+      t.modalErrors = {};
+      if (t.credentials.service == "") {
+        t.modalErrors = { serviceField: "Please provide service name" };
+        bvModalEvt.preventDefault();
+        return;
+      }
+      if (t.credentials.secret == "") {
+        t.modalErrors = { passwordField: "Please provide password" };
+        bvModalEvt.preventDefault();
+        return;
+      }
+      if (t.credentials.secret != t.credentials.confirm) {
+        t.modalErrors = { confirmField: "Password mismatch" };
+        bvModalEvt.preventDefault();
+        return;
+      }
       REST.SaveCredentials(t.credentials, function() {
-        t.credentials = {
-          id: "",
-          service: "svc",
-          secret: "password",
-          confirm: "password",
-          comment: "comment"
-        };
+        t.credentials = Model.Credentials();
         REST.ListCredentials(function(data) {
           t.items = data;
         });
@@ -168,7 +180,7 @@ export default {
           }
         })
         .catch(err => {
-          // An error occurred
+          console.log("Error on list", err);
         });
     }
   }
