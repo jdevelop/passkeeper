@@ -1,15 +1,14 @@
 .PHONY: web firmware
+USERID ?= \\\#1000
 
 all: 	web firmware
 
 firmware:
-	docker pull golang:1.12-alpine
-	docker run --rm -v $(PWD):/tmp/dev -w /tmp/dev golang:1.12-alpine /bin/sh -c 'apk add make git upx && make -C firmware clean all'
+	docker run --rm -e HOME=/tmp/dev -v $(PWD):/tmp/dev -w /tmp/dev jdevelop/passkeeperbuild:1.12-alpine /bin/sh -c 'make -C firmware clean all'
 
 web:
-	docker pull node:11-alpine
-	docker run --rm -v $(PWD)/web:/works -w /works -u node node:11-alpine npm install
-	docker run --rm -v $(PWD)/web:/works -w /works -u node node:11-alpine npm run build
+	docker run --rm -u ${USERID} -v $(PWD)/web:/works -w /works -u node node:11-alpine npm install
+	docker run --rm -u ${USERID} -v $(PWD)/web:/works -w /works -u node node:11-alpine npm run build
 
 
 linux: 

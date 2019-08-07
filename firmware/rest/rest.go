@@ -7,26 +7,27 @@ import (
 	"net/http"
 
 	"github.com/gobuffalo/packr"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/jdevelop/passkeeper/firmware"
 	"github.com/jdevelop/passkeeper/firmware/storage"
 )
 
 type storageCombined interface {
-	storage.SeedStorageRead
-	storage.SeedStorageWrite
-	storage.SeedStorageList
-	storage.SeedStorageRemove
+	storage.CredentialsStorageList
+	storage.CredentialsStorageRead
+	storage.CredentialsStorageRemove
+	storage.CredentialsStorageWrite
 }
 
 type RESTServer struct {
-	SeedStorage storageCombined
+	credStorage storageCombined
 }
 
 func corsHeaders(w http.ResponseWriter) http.ResponseWriter {
 	hdr := w.Header()
 	hdr.Set("Access-Control-Allow-Origin", "*")
-	hdr.Set("Access-Control-Allow-Methods", "GET,PUT,DELETE,POST")
+	hdr.Set("Access-Control-Allow-Methods", "OPTIONS,GET,PUT,DELETE,POST")
 	hdr.Set("Access-Control-Allow-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range")
 	return w
 }
@@ -51,13 +52,13 @@ func errorResp(w http.ResponseWriter, msg string, err *error) {
 	http.Error(w, msg, 400)
 }
 
-func (r *RESTServer) listSeeds(w http.ResponseWriter, _ *http.Request) {
-	seeds, err := r.SeedStorage.ListSeeds()
+func (r *RESTServer) listCredentials(w http.ResponseWriter, _ *http.Request) {
+	services, err := r.credStorage.ListCredentials()
 	if err != nil {
 		errorResp(w, "Can't load seeds", &err)
 		return
 	}
-	data, err := json.Marshal(seeds)
+	data, err := json.Marshal(services)
 	if err != nil {
 		errorResp(w, "Can't marshal seeds", &err)
 		return
@@ -70,32 +71,29 @@ func (r *RESTServer) listSeeds(w http.ResponseWriter, _ *http.Request) {
 	return
 }
 
-func (r *RESTServer) loadSeed(w http.ResponseWriter, req *http.Request) {
-	seedId, ok := req.URL.Query()["seed"]
-	if !ok || len(seedId) != 1 {
-		errorResp(w, "No required parameter", nil)
-		return
+func (r *RESTServer) loadCredentials(w http.ResponseWriter, req *http.Request) {
+	data := mux.Vars(req)
+	if v, ok := data["id"]; !ok {
+		if !ok {
+			errorResp(w, "No required parameter", nil)
+			return
+		}
+	} else {
+		seed, err := r.credStorage.ReadCredentials(v)
+		if err != nil {
+			errorResp(w, "Can't find seed", &err)
+			return
+		}
+		data, err := json.Marshal(&seed)
+		if err != nil {
+			errorResp(w, "Can't marshal seed", &err)
+			return
+		}
+		jsonHeaders(corsHeaders(w)).Write(data)
 	}
-	seed, err := r.SeedStorage.LoadSeed(seedId[0])
-
-	if err != nil {
-		errorResp(w, "Can't find seed", &err)
-		return
-	}
-
-	data, err := json.Marshal(&seed)
-
-	if err != nil {
-		errorResp(w, "Can't marshal seed", &err)
-		return
-	}
-
-	jsonHeaders(corsHeaders(w)).Write(data)
-
-	return
 }
 
-func (r *RESTServer) saveSeed(w http.ResponseWriter, req *http.Request) {
+func (r *RESTServer) saveCredentials(w http.ResponseWriter, req *http.Request) {
 
 	data, err := ioutil.ReadAll(req.Body)
 
@@ -104,33 +102,36 @@ func (r *RESTServer) saveSeed(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var s passkeeper.Seed
+	var s firmware.Credentials
 
 	if err = json.Unmarshal(data, &s); err != nil {
 		errorResp(w, "Can't unmarshal seed object", &err)
 		return
 	}
 
-	if err = r.SeedStorage.SaveSeed(s); err != nil {
+	if s.Id == "" {
+		s.Id = uuid.New().String()
+	}
+
+	if err = r.credStorage.WriteCredentials(s); err != nil {
 		errorResp(w, "Can't save seed", &err)
 		return
 	}
 
-	corsHeaders(jsonHeaders(w)).Write([]byte("{ \"message\" : \"saved\" }"))
+	corsHeaders(jsonHeaders(w)).Write([]byte(`{ "message" : "saved" }`))
 	return
 }
 
-func (r *RESTServer) removeSeed(w http.ResponseWriter, req *http.Request) {
-
-	seedId, ok := req.URL.Query()["seed"]
-	if !ok || len(seedId) != 1 {
+func (r *RESTServer) removeCredentials(w http.ResponseWriter, req *http.Request) {
+	data := mux.Vars(req)
+	if v, ok := data["id"]; !ok {
 		errorResp(w, "No required parameter", nil)
 		return
-	}
-
-	if err := r.SeedStorage.RemoveSeed(seedId[0]); err != nil {
-		errorResp(w, "Can't remove seed", &err)
-		return
+	} else {
+		if err := r.credStorage.RemoveCredentials(v); err != nil {
+			errorResp(w, "Can't remove seed", &err)
+			return
+		}
 	}
 
 	corsHeaders(jsonHeaders(w)).Write([]byte("{ \"message\" : \"removed\" }"))
@@ -139,7 +140,7 @@ func (r *RESTServer) removeSeed(w http.ResponseWriter, req *http.Request) {
 
 func Start(host string, port int, s storageCombined, changeCallback func()) {
 	srv := RESTServer{
-		SeedStorage: s,
+		credStorage: s,
 	}
 
 	rtr := mux.NewRouter()
@@ -153,10 +154,15 @@ func Start(host string, port int, s storageCombined, changeCallback func()) {
 		}
 	}
 
-	rtr.HandleFunc("/api/seeds", srv.listSeeds).Methods("GET")
-	rtr.HandleFunc("/api/seed", wrapper(srv.saveSeed)).Methods("PUT")
-	rtr.HandleFunc("/api/seed", wrapper(srv.loadSeed)).Methods("GET")
-	rtr.HandleFunc("/api/seed", wrapper(srv.removeSeed)).Methods("DELETE")
+	// handle CORS OPTIONS
+	rtr.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		corsHeaders(w)
+	})
+
+	rtr.HandleFunc("/list", srv.listCredentials).Methods(http.MethodGet)
+	rtr.HandleFunc("/add", wrapper(srv.saveCredentials)).Methods(http.MethodPut)
+	rtr.HandleFunc("/{id}", wrapper(srv.loadCredentials)).Methods(http.MethodGet)
+	rtr.HandleFunc("/{id}", wrapper(srv.removeCredentials)).Methods(http.MethodDelete)
 
 	box := packr.NewBox("../../web/dist/")
 

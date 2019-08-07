@@ -6,37 +6,37 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jdevelop/passkeeper"
+	"github.com/jdevelop/passkeeper/firmware"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSeedGeneration(t *testing.T) {
+func TestCredsGeneration(t *testing.T) {
 	os.Remove("/tmp/passkeeperseed_plain_text.txt")
-	txt, err := storage.NewPlainText("/tmp/passkeeperseed_plain_text.txt", []byte("a very very very very secret key"))
+	txt, err := NewPlainText("/tmp/passkeeperseed_plain_text.txt", []byte("a very very very very secret key"))
 	assert.Nil(t, err, "Error creating plaintext storage")
-	data, err := txt.LoadSeed("HELLO")
+	data, err := txt.LoadCredentials("HELLO")
 	assert.Nil(t, err)
-	err = txt.SaveSeed(passkeeper.Seed{SeedId: "HELLO", SeedSecret: "WORLD"})
+	err = txt.SaveCredentials(firmware.Credentials{Service: "HELLO", Secret: "WORLD"})
 	assert.Nil(t, err)
-	data, err = txt.LoadSeed("HELLO")
+	data, err = txt.LoadCredentials("HELLO")
 	assert.Nil(t, err)
-	assert.Equal(t, passkeeper.Seed{SeedId: "HELLO", SeedSecret: "WORLD"}, *data)
+	assert.Equal(t, firmware.Credentials{Service: "HELLO", Secret: "WORLD"}, *data)
 
-	err = txt.SaveSeed(passkeeper.Seed{SeedId: "HELLO", SeedSecret: "pas"})
+	err = txt.SaveCredentials(firmware.Credentials{Service: "HELLO", Secret: "pas"})
 	assert.Nil(t, err)
 
-	data, err = txt.LoadSeed("HELLO")
+	data, err = txt.LoadCredentials("HELLO")
 	fmt.Println(err)
 	assert.Nil(t, err)
-	assert.Equal(t, passkeeper.Seed{SeedId: "HELLO", SeedSecret: "pas"}, *data)
+	assert.Equal(t, firmware.Credentials{Service: "HELLO", Secret: "pas"}, *data)
 
-	data, err = txt.LoadSeed("HELLOW")
+	data, err = txt.LoadCredentials("HELLOW")
 	assert.Nil(t, err)
-	assert.Equal(t, passkeeper.Seed{}, *data)
+	assert.Equal(t, firmware.Credentials{}, *data)
 
-	seeds, err := txt.ListSeeds()
+	creds, err := txt.ListCredentialss()
 	assert.Nil(t, err)
-	assert.EqualValues(t, seeds, []string{"HELLO"})
+	assert.EqualValues(t, creds, []string{"HELLO"})
 	txt.Close()
 }
 

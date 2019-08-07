@@ -28,7 +28,7 @@ func NewPlainText(filename string, key []byte) (*PlainText, error) {
 	}, nil
 }
 
-func readSeeds(s *PlainText) ([]passkeeper.Seed, error) {
+func readCredentials(s *PlainText) ([]firmware.Credentials, error) {
 	s.file.Seek(0, 0)
 	bytes, err := ioutil.ReadAll(s.file)
 	if err != nil {
@@ -36,7 +36,7 @@ func readSeeds(s *PlainText) ([]passkeeper.Seed, error) {
 	}
 
 	if len(bytes) == 0 {
-		return make([]passkeeper.Seed, 0), nil
+		return make([]firmware.Credentials, 0), nil
 	}
 
 	pt, err := decrypt([]byte(s.key), bytes)
@@ -45,7 +45,7 @@ func readSeeds(s *PlainText) ([]passkeeper.Seed, error) {
 		return nil, err
 	}
 
-	var seeds []passkeeper.Seed
+	var seeds []firmware.Credentials
 
 	err = json.Unmarshal(pt, &seeds)
 	if err != nil {
@@ -55,40 +55,40 @@ func readSeeds(s *PlainText) ([]passkeeper.Seed, error) {
 	return seeds, nil
 }
 
-func (s *PlainText) LoadSeed(id string) (*passkeeper.Seed, error) {
+func (s *PlainText) ReadCredentials(id string) (*firmware.Credentials, error) {
 
-	seeds, err := readSeeds(s)
+	passwords, err := readCredentials(s)
 	if err != nil {
 		return nil, err
 	}
-	var seed passkeeper.Seed
-	for _, s := range seeds {
-		if s.SeedId == id {
-			seed = s
+	var password firmware.Credentials
+	for _, s := range passwords {
+		if s.Id == id {
+			password = s
 			break
 		}
 	}
-	return &seed, nil
+	return &password, nil
 }
 
-func (s *PlainText) RemoveSeed(key string) error {
-	seeds, err := readSeeds(s)
+func (s *PlainText) RemoveCredentials(id string) error {
+	passwords, err := readCredentials(s)
 	if err != nil {
 		return err
 	}
 	var pos = -1
-	for i, seed := range seeds {
-		if seed.SeedId == key {
+	for i, password := range passwords {
+		if password.Id == id {
 			pos = i
 			break
 		}
 	}
 	if pos > -1 {
-		last := len(seeds) - 1
-		seeds[pos] = seeds[len(seeds)-1]
-		return s.writeSeedsToFile(seeds[:last])
+		last := len(passwords) - 1
+		passwords[pos] = passwords[last]
+		return s.writeCredentialsToFile(passwords[:last])
 	}
-	return fmt.Errorf("cant find seed for %s", key)
+	return fmt.Errorf("cant find seed for %s", id)
 }
 
 func backupFile(src *os.File) (_ string, err error) {
@@ -113,7 +113,7 @@ func backupFile(src *os.File) (_ string, err error) {
 	return newFile, err
 }
 
-func (s *PlainText) writeSeedsToFile(seeds []passkeeper.Seed) error {
+func (s *PlainText) writeCredentialsToFile(seeds []firmware.Credentials) error {
 	bytes, err := json.Marshal(seeds)
 	if err != nil {
 		return err
@@ -139,9 +139,9 @@ func (s *PlainText) writeSeedsToFile(seeds []passkeeper.Seed) error {
 	return s.file.Sync()
 }
 
-func (s *PlainText) SaveSeed(seed passkeeper.Seed) error {
+func (s *PlainText) WriteCredentials(seed firmware.Credentials) error {
 
-	seeds, err := readSeeds(s)
+	seeds, err := readCredentials(s)
 
 	if err != nil {
 		return err
@@ -150,7 +150,7 @@ func (s *PlainText) SaveSeed(seed passkeeper.Seed) error {
 	exI := -1
 
 	for i, s := range seeds {
-		if s.SeedId == seed.SeedId {
+		if s.Id == seed.Id {
 			exI = i
 			break
 		}
@@ -162,29 +162,31 @@ func (s *PlainText) SaveSeed(seed passkeeper.Seed) error {
 		seeds[exI] = seed
 	}
 
-	return s.writeSeedsToFile(seeds)
+	return s.writeCredentialsToFile(seeds)
 
 }
 
-func (s *PlainText) ListSeeds() ([]string, error) {
+func (s *PlainText) ListCredentials() ([]firmware.Credentials, error) {
 	_, err := s.file.Seek(0, 0)
 	if err != nil {
 		return nil, err
 	}
-	seeds, err := readSeeds(s)
+	seeds, err := readCredentials(s)
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]string, len(seeds))
-
-	for i, s := range seeds {
-		res[i] = s.SeedId
-	}
-
-	return res, nil
+	return seeds, nil
 }
 
 func (s *PlainText) Close() error {
 	return s.file.Close()
 }
+
+var (
+	p PlainText
+	_ CredentialsStorageRead   = &p
+	_ CredentialsStorageWrite  = &p
+	_ CredentialsStorageList   = &p
+	_ CredentialsStorageRemove = &p
+)

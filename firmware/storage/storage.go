@@ -4,18 +4,18 @@ import (
 	"github.com/jdevelop/passkeeper/firmware"
 )
 
-type SeedStorageRead interface {
-	LoadSeed(id string) (*passkeeper.Seed, error)
+type CredentialsStorageRead interface {
+	ReadCredentials(string) (*firmware.Credentials, error)
 }
 
-type SeedStorageWrite interface {
-	SaveSeed(seed passkeeper.Seed) error
+type CredentialsStorageWrite interface {
+	WriteCredentials(firmware.Credentials) error
 }
 
-type SeedStorageList interface {
-	ListSeeds() ([]string, error)
+type CredentialsStorageList interface {
+	ListCredentials() ([]firmware.Credentials, error)
 }
 
-type SeedStorageRemove interface {
-	RemoveSeed(key string) error
+type CredentialsStorageRemove interface {
+	RemoveCredentials(string) error
 }

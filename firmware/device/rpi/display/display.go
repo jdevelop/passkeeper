@@ -2,6 +2,8 @@ package display
 
 import (
 	"fmt"
+
+	"github.com/jdevelop/passkeeper/firmware"
 )
 
 type HardwareDisplay interface {
@@ -13,12 +15,12 @@ type HardwareDisplay interface {
 
 type TextBlockDisplay struct {
 	realDisplay  HardwareDisplay
-	content      *[]string
+	content      *[]firmware.Credentials
 	offset       int
 	screenHeight int
 }
 
-func MakeTextDisplay(hw HardwareDisplay, content *[]string, height int) *TextBlockDisplay {
+func MakeTextDisplay(hw HardwareDisplay, content *[]firmware.Credentials, height int) *TextBlockDisplay {
 	return &TextBlockDisplay{
 		realDisplay:  hw,
 		content:      content,
@@ -51,7 +53,7 @@ func (d *TextBlockDisplay) Refresh() {
 
 	for i := 0; windowTop+i <= windowBottom; i++ {
 		d.realDisplay.SetCursor(uint8(i), 0)
-		d.realDisplay.Print(" " + (*d.content)[windowTop+i])
+		d.realDisplay.Print(" " + (*d.content)[windowTop+i].Service)
 	}
 	d.realDisplay.SetCursor(uint8(d.offset-windowTop), 0)
 	d.realDisplay.Print(">")

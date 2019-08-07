@@ -1,6 +1,8 @@
-package passkeeper
+package firmware
 
-type Seed struct {
-	SeedId     string `json:"seed_id,omitempty"`
-	SeedSecret string `json:"seed_secret,omitempty"`
+type Credentials struct {
+	Id      string `json:"id,omitempty"`
+	Service string `json:"service,omitempty"`
+	Secret  string `json:"secret,omitempty"`
+	Comment string `json:"comment,omitempty"`
 }
