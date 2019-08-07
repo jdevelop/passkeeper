@@ -41,10 +41,10 @@
         <b-form-group id="input-group-1" label-for="input-1" description="Password service">
           <b-alert variant="danger" :show="modalErrors.serviceField">{{ modalErrors.serviceField }}</b-alert>
           <b-form-input
+            v-bind:class="{'border border-danger': modalErrors.serviceField }"
             id="input-1"
-            type="email"
+            type="text"
             v-model="credentials.service"
-            required
             placeholder="Service"
           ></b-form-input>
         </b-form-group>
@@ -55,6 +55,7 @@
             :show="modalErrors.passwordField"
           >{{ modalErrors.passwordField }}</b-alert>
           <b-form-input
+            v-bind:class="{'border border-danger': modalErrors.passwordField }"
             id="input-2"
             type="password"
             v-model="credentials.secret"
@@ -66,6 +67,7 @@
         <b-form-group id="input-group-3" description="Confirm password" label-for="input-3">
           <b-alert variant="danger" :show="modalErrors.confirmField">{{ modalErrors.confirmField }}</b-alert>
           <b-form-input
+            v-bind:class="{'border border-danger': modalErrors.confirmField }"
             id="input-3"
             type="password"
             v-model="credentials.confirm"
