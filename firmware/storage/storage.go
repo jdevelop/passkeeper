@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"io"
+
 	"github.com/jdevelop/passkeeper/firmware"
 )
 
@@ -18,4 +20,12 @@ type CredentialsStorageList interface {
 
 type CredentialsStorageRemove interface {
 	RemoveCredentials(string) error
+}
+
+type CredentialsStorageBackup interface {
+	BackupStorage(func(io.Reader) error) error
+}
+
+type CredentialsStorageRestore interface {
+	RestoreStorage(io.Reader) error
 }

@@ -24,6 +24,7 @@ ${OUT}/splash:
 
 packr-dep:
 	go get -u github.com/gobuffalo/packr/packr
+	go mod tidy
 
 upx: ${OUT}/service ${OUT}/util ${OUT}/splash
 	upx ${OUT}/service

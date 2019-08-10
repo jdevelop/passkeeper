@@ -26,6 +26,8 @@ type passwords struct {
 }
 
 type rfid struct {
+	RfidIRQPin       string  `json:"irq_pin,omitempty"`
+	RfidResetPin     string  `json:"reset_pin,omitempty"`
 	RfidAccessKey    [6]byte `json:"access_key,omitempty"`
 	RfidAccessSector int     `json:"access_sector,omitempty"`
 	RfidAccessBlock  int     `json:"access_block,omitempty"`
@@ -68,6 +70,8 @@ var DefaultConfig = Config{
 		PasswordFile: "/root/passwordstorage.enc",
 	},
 	Rfid: rfid{
+		RfidIRQPin:       "17",
+		RfidResetPin:     "27",
 		RfidAccessBlock:  1,
 		RfidAccessSector: 1,
 		RfidAccessKey:    [...]byte{1, 2, 3, 4, 5, 6},

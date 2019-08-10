@@ -29,17 +29,51 @@ const (
 	irqPinStr   = "17"
 )
 
-func NewRFIDPass(cardKey [6]byte, pwdSector, pwdBlock int) (*RFID, error) {
+type config struct {
+	resetPin, irqPin string
+}
+
+var defaultConfig = config{
+	resetPin: "27",
+	irqPin:   "17",
+}
+
+type PinConfF func(*config) *config
+
+func WithResetPin(pin string) PinConfF {
+	return func(c *config) *config {
+		c.resetPin = pin
+		return c
+	}
+}
+
+func WithIRQPin(pin string) PinConfF {
+	return func(c *config) *config {
+		c.irqPin = pin
+		return c
+	}
+}
+
+func NewRFIDPass(cardKey [6]byte, pwdSector, pwdBlock int, confs ...PinConfF) (*RFID, error) {
 	dev, err := spireg.Open("")
 	if err != nil {
 		return nil, err
 	}
 
-	resetPin := gpioreg.ByName(resetPinStr)
+	c := defaultConfig
+	{
+		cc := &c
+		for _, f := range confs {
+			cc = f(cc)
+		}
+		c = *cc
+	}
+
+	resetPin := gpioreg.ByName(c.resetPin)
 	if resetPin == nil {
 		return nil, fmt.Errorf("can't open reset pin")
 	}
-	irqPin := gpioreg.ByName(irqPinStr)
+	irqPin := gpioreg.ByName(c.irqPin)
 	if irqPin == nil {
 		return nil, fmt.Errorf("can't open irq pin")
 	}

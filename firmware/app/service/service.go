@@ -97,7 +97,17 @@ func main() {
 		raspberry.SelfCheckFailure(err)
 	}
 
-	rfid, err := pass.NewRFIDPass(c.Rfid.RfidAccessKey, c.Rfid.RfidAccessSector, c.Rfid.RfidAccessBlock)
+	pinsConf := make([]pass.PinConfF, 0)
+	if c.Rfid.RfidIRQPin != "" {
+		db.Log("Using RFID IRQ pin " + c.Rfid.RfidIRQPin)
+		pinsConf = append(pinsConf, pass.WithIRQPin(c.Rfid.RfidIRQPin))
+	}
+	if c.Rfid.RfidResetPin != "" {
+		db.Log("Using RFID reset pin " + c.Rfid.RfidResetPin)
+		pinsConf = append(pinsConf, pass.WithResetPin(c.Rfid.RfidResetPin))
+	}
+
+	rfid, err := pass.NewRFIDPass(c.Rfid.RfidAccessKey, c.Rfid.RfidAccessSector, c.Rfid.RfidAccessBlock, pinsConf...)
 	if err != nil {
 		db.Log("RFID failure")
 		raspberry.SelfCheckFailure(err)

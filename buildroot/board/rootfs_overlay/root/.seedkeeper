@@ -9,10 +9,12 @@
     "key_up": 26,
     "key_down": 21
   },
-  "seeds": {
+  "passwords": {
     "file": "/root/seedstorage.enc"
   },
   "rfid": {
+    "irq_pin" : "17",
+    "reset_pin": "27",
     "access_key": [
       255,
       255,

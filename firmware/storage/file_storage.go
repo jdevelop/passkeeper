@@ -183,10 +183,21 @@ func (s *PlainText) Close() error {
 	return s.file.Close()
 }
 
+func (s *PlainText) BackupStorage(f func(io.Reader) error) error {
+	s.file.Seek(0, 0)
+	return nil
+}
+
+func (s *PlainText) RestoreStorage(src io.Reader) error {
+	return nil
+}
+
 var (
 	p PlainText
 	_ CredentialsStorageRead   = &p
 	_ CredentialsStorageWrite  = &p
 	_ CredentialsStorageList   = &p
 	_ CredentialsStorageRemove = &p
+	_ CredentialsStorageBackup = &p
+	_ CredentialsStorageBackup = &p
 )
