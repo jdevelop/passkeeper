@@ -1,62 +1,60 @@
 package storage
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/jdevelop/passkeeper/firmware"
 )
 
 type PlainText struct {
-	file *os.File
-	key  []byte
+	filePath string
+	key      []byte
 }
 
 func NewPlainText(filename string, key []byte) (*PlainText, error) {
-	f, err := os.OpenFile(filename, os.O_CREATE|os.O_RDWR, 0600)
-	if err != nil {
+	_, err := os.Stat(filename)
+	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
 	return &PlainText{
-		file: f,
-		key:  key,
+		filePath: filename,
+		key:      key,
 	}, nil
 }
 
 func readCredentials(s *PlainText) ([]firmware.Credentials, error) {
-	s.file.Seek(0, 0)
-	bytes, err := ioutil.ReadAll(s.file)
+	bytes, err := ioutil.ReadFile(s.filePath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return make([]firmware.Credentials, 0), nil
+		}
 		return nil, err
 	}
-
 	if len(bytes) == 0 {
 		return make([]firmware.Credentials, 0), nil
 	}
-
 	pt, err := decrypt([]byte(s.key), bytes)
 
 	if err != nil {
 		return nil, err
 	}
-
 	var seeds []firmware.Credentials
-
 	err = json.Unmarshal(pt, &seeds)
 	if err != nil {
 		return nil, err
 	}
-
 	return seeds, nil
 }
 
 func (s *PlainText) ReadCredentials(id string) (*firmware.Credentials, error) {
-
 	passwords, err := readCredentials(s)
 	if err != nil {
 		return nil, err
@@ -91,25 +89,23 @@ func (s *PlainText) RemoveCredentials(id string) error {
 	return fmt.Errorf("cant find seed for %s", id)
 }
 
-func backupFile(src *os.File) (_ string, err error) {
-	if _, err := src.Seek(0, 0); err != nil {
-		return "", err
+func backupFile(src string) (string, error) {
+	_, err := os.Stat(src)
+	if err != nil && os.IsNotExist(err) {
+		return "", nil
 	}
-	parentDir := filepath.Dir(src.Name())
-	currentFile := filepath.Base(src.Name())
+	parentDir := filepath.Dir(src)
+	currentFile := filepath.Base(src)
 	newFile := fmt.Sprintf("%s.%d", filepath.Join(parentDir, currentFile), time.Now().Unix())
 	dst, err := os.OpenFile(newFile, os.O_CREATE|os.O_RDWR, 0600)
-	defer func() {
-		if err == nil {
-			err = dst.Close()
-		} else {
-			dst.Close()
-		}
-	}()
 	if err != nil {
 		return "", err
 	}
-	_, err = io.Copy(dst, src)
+	srcF, err := os.Open(src)
+	if err != nil {
+		return "", err
+	}
+	_, err = io.Copy(dst, srcF)
 	return newFile, err
 }
 
@@ -124,19 +120,11 @@ func (s *PlainText) writeCredentialsToFile(seeds []firmware.Credentials) error {
 		return err
 	}
 
-	if name, err := backupFile(s.file); err != nil {
+	if name, err := backupFile(s.filePath); err != nil {
 		return fmt.Errorf("Can't backup file '%s' : %v", name, err)
 	}
 
-	if err := s.file.Truncate(0); err != nil {
-		return err
-	}
-	_, err = s.file.WriteAt(enc, 0)
-	if err != nil {
-		return err
-	}
-
-	return s.file.Sync()
+	return ioutil.WriteFile(s.filePath, enc, 0600)
 }
 
 func (s *PlainText) WriteCredentials(seed firmware.Credentials) error {
@@ -167,10 +155,6 @@ func (s *PlainText) WriteCredentials(seed firmware.Credentials) error {
 }
 
 func (s *PlainText) ListCredentials() ([]firmware.Credentials, error) {
-	_, err := s.file.Seek(0, 0)
-	if err != nil {
-		return nil, err
-	}
 	seeds, err := readCredentials(s)
 	if err != nil {
 		return nil, err
@@ -180,12 +164,24 @@ func (s *PlainText) ListCredentials() ([]firmware.Credentials, error) {
 }
 
 func (s *PlainText) Close() error {
-	return s.file.Close()
+	return nil
 }
 
-func (s *PlainText) BackupStorage(f func(io.Reader) error) error {
-	s.file.Seek(0, 0)
-	return nil
+func (s *PlainText) BackupStorage() (io.Reader, error) {
+	data, err := ioutil.ReadFile(s.filePath)
+	if err != nil {
+		switch {
+		case os.IsNotExist(err):
+			return strings.NewReader("[]"), nil
+		default:
+			return nil, err
+		}
+	}
+	pt, err := decrypt([]byte(s.key), data)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(pt), nil
 }
 
 func (s *PlainText) RestoreStorage(src io.Reader) error {

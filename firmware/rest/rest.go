@@ -3,6 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -18,6 +19,7 @@ type storageCombined interface {
 	storage.CredentialsStorageRead
 	storage.CredentialsStorageRemove
 	storage.CredentialsStorageWrite
+	storage.CredentialsStorageBackup
 }
 
 type RESTServer struct {
@@ -138,6 +140,15 @@ func (r *RESTServer) removeCredentials(w http.ResponseWriter, req *http.Request)
 	return
 }
 
+func (r *RESTServer) backupCredentials(w http.ResponseWriter, req *http.Request) {
+	reader, err := r.credStorage.BackupStorage()
+	if err != nil {
+		errorResp(w, "Can't read credentials", &err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	io.Copy(jsonHeaders(corsHeaders(w)), reader)
+}
+
 func Start(host string, port int, s storageCombined, changeCallback func()) {
 	srv := RESTServer{
 		credStorage: s,
@@ -159,6 +170,7 @@ func Start(host string, port int, s storageCombined, changeCallback func()) {
 		corsHeaders(w)
 	})
 
+	rtr.HandleFunc("/backup", srv.backupCredentials).Methods(http.MethodGet)
 	rtr.HandleFunc("/list", srv.listCredentials).Methods(http.MethodGet)
 	rtr.HandleFunc("/add", wrapper(srv.saveCredentials)).Methods(http.MethodPut)
 	rtr.HandleFunc("/{id}", wrapper(srv.loadCredentials)).Methods(http.MethodGet)

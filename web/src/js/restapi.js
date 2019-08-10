@@ -15,5 +15,17 @@ export const REST = {
     axios
       .delete(`${process.env.VUE_APP_API_URL}/${id}`, {}, {})
       .then(data => done(data.data));
+  },
+  Backup() {
+    axios
+      .get(`${process.env.VUE_APP_API_URL}/backup`, { responseType: "blob" })
+      .then(response => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "passkeeper-credentials.json");
+        document.body.appendChild(link);
+        link.click();
+      });
   }
 };

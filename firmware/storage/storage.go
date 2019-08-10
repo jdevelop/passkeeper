@@ -23,7 +23,7 @@ type CredentialsStorageRemove interface {
 }
 
 type CredentialsStorageBackup interface {
-	BackupStorage(func(io.Reader) error) error
+	BackupStorage() (io.Reader, error)
 }
 
 type CredentialsStorageRestore interface {

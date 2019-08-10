@@ -4,7 +4,7 @@
       <b-navbar-brand>PassKeeper 1.0</b-navbar-brand>
       <b-navbar-nav small>
         <b-nav-item><router-link to="/" class="menulinks">Dashboard</router-link></b-nav-item>
-        <b-nav-item><router-link to="/settings" class="menulinks">Settings</router-link></b-nav-item>
+        <b-nav-item><router-link to="/settings" class="menulinks">Manage</router-link></b-nav-item>
       </b-navbar-nav>
     </b-navbar>
     <router-view/>
