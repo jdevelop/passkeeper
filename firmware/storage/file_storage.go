@@ -185,7 +185,26 @@ func (s *PlainText) BackupStorage() (io.Reader, error) {
 }
 
 func (s *PlainText) RestoreStorage(src io.Reader) error {
-	return nil
+	data, err := ioutil.ReadAll(src)
+	if err != nil {
+		return err
+	}
+	var sample []firmware.Credentials
+	if err := json.Unmarshal(data, &sample); err != nil {
+		return err
+	}
+	if len(sample) == 0 {
+		return fmt.Errorf("can't restore zero-length credentials list")
+	}
+	enc, err := encrypt(s.key, data)
+	if err != nil {
+		return err
+	}
+	_, err = backupFile(s.filePath)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(s.filePath, enc, 0600)
 }
 
 var (

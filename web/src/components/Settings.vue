@@ -4,7 +4,8 @@
       <b-row>
         <b-col sz="10" lg="4" offset-lg="4">
           <b-btn size="lg" variant="success" @click="backup()">Backup</b-btn>&nbsp;
-          <b-btn size="lg" variant="danger" @click="restore()">Restore</b-btn>
+          <b-btn size="lg" variant="danger" @click="popRestore()">Restore</b-btn>
+          <input type="file" hidden @change="restore()" ref="restoreF" />
         </b-col>
       </b-row>
     </b-card>
@@ -13,6 +14,7 @@
 
 <script>
 import { REST } from "@/js/restapi.js";
+import { FileUploadService } from "v-file-upload";
 export default {
   data() {
     return {};
@@ -21,8 +23,16 @@ export default {
     backup() {
       REST.Backup();
     },
+    popRestore() {
+      this.$refs.restoreF.click();
+    },
     restore() {
-      console.log("Restore");
+      const fileUpload = new FileUploadService(
+        `${process.env.VUE_APP_API_URL}/restore`
+      );
+      fileUpload.upload(this.$refs.restoreF.files[0]).then(() => {
+        this.$router.push({ path: "/" });
+      });
     }
   }
 };

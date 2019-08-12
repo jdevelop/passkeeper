@@ -20,6 +20,7 @@ type storageCombined interface {
 	storage.CredentialsStorageRemove
 	storage.CredentialsStorageWrite
 	storage.CredentialsStorageBackup
+	storage.CredentialsStorageRestore
 }
 
 type RESTServer struct {
@@ -33,6 +34,12 @@ func corsHeaders(w http.ResponseWriter) http.ResponseWriter {
 	hdr.Set("Access-Control-Allow-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range")
 	return w
 }
+
+var (
+	removed  = []byte(`{ "message" : "removed" }`)
+	saved    = []byte(`{ "message" : "saved" }`)
+	restored = []byte(`{ "message" : "restored" }`)
+)
 
 func jsonHeaders(w http.ResponseWriter) http.ResponseWriter {
 	hdr := w.Header()
@@ -120,7 +127,7 @@ func (r *RESTServer) saveCredentials(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	corsHeaders(jsonHeaders(w)).Write([]byte(`{ "message" : "saved" }`))
+	corsHeaders(jsonHeaders(w)).Write(saved)
 	return
 }
 
@@ -135,9 +142,7 @@ func (r *RESTServer) removeCredentials(w http.ResponseWriter, req *http.Request)
 			return
 		}
 	}
-
-	corsHeaders(jsonHeaders(w)).Write([]byte("{ \"message\" : \"removed\" }"))
-	return
+	corsHeaders(jsonHeaders(w)).Write(removed)
 }
 
 func (r *RESTServer) backupCredentials(w http.ResponseWriter, req *http.Request) {
@@ -147,6 +152,24 @@ func (r *RESTServer) backupCredentials(w http.ResponseWriter, req *http.Request)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	io.Copy(jsonHeaders(corsHeaders(w)), reader)
+}
+
+func (r *RESTServer) restoreCredentials(w http.ResponseWriter, req *http.Request) {
+	if err := req.ParseMultipartForm(10000); err != nil {
+		errorResp(w, "can't parse multipart request", &err)
+		return
+	}
+	file, _, err := req.FormFile("file")
+	if err != nil {
+		errorResp(w, "no file content", &err)
+		return
+	}
+	defer file.Close()
+	if err := r.credStorage.RestoreStorage(file); err != nil {
+		errorResp(w, "can't restore storage", &err)
+		return
+	}
+	corsHeaders(jsonHeaders(w)).Write(restored)
 }
 
 func Start(host string, port int, s storageCombined, changeCallback func()) {
@@ -171,6 +194,7 @@ func Start(host string, port int, s storageCombined, changeCallback func()) {
 	})
 
 	rtr.HandleFunc("/backup", srv.backupCredentials).Methods(http.MethodGet)
+	rtr.HandleFunc("/restore", srv.restoreCredentials).Methods(http.MethodPost)
 	rtr.HandleFunc("/list", srv.listCredentials).Methods(http.MethodGet)
 	rtr.HandleFunc("/add", wrapper(srv.saveCredentials)).Methods(http.MethodPut)
 	rtr.HandleFunc("/{id}", wrapper(srv.loadCredentials)).Methods(http.MethodGet)

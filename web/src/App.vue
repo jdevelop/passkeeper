@@ -3,23 +3,27 @@
     <b-navbar type="dark" variant="dark">
       <b-navbar-brand>PassKeeper 1.0</b-navbar-brand>
       <b-navbar-nav small>
-        <b-nav-item><router-link to="/" class="menulinks">Dashboard</router-link></b-nav-item>
-        <b-nav-item><router-link to="/settings" class="menulinks">Manage</router-link></b-nav-item>
+        <b-nav-item>
+          <router-link to="/" class="menulinks" exact active-class="current-link">Dashboard</router-link>
+        </b-nav-item>
+        <b-nav-item>
+          <router-link to="/settings" class="menulinks" exact active-class="current-link">Manage</router-link>
+        </b-nav-item>
       </b-navbar-nav>
     </b-navbar>
-    <router-view/>
+    <router-view />
   </b-container>
 </template>
 
 <script>
 export default {
-  name: 'app',
-}
+  name: "app"
+};
 </script>
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -30,5 +34,9 @@ export default {
   font-size: 12pt;
   text-decoration: none;
   color: burlywood !important;
+}
+.current-link {
+  font-weight: bolder;
+  color: goldenrod;
 }
 </style>
