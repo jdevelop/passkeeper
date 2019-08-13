@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jdevelop/passkeeper/firmware/pass"
 	"github.com/jdevelop/passkeeper/firmware/rest"
 	"github.com/jdevelop/passkeeper/firmware/storage"
 )
@@ -25,5 +26,5 @@ func main() {
 
 	fmt.Printf("Starting REST service at http://%s:%d\n", *host, *port)
 
-	rest.Start(*host, *port, s, func() {})
+	rest.Start(*host, *port, s, pass.NewPasswordGenerator(8), func() {})
 }

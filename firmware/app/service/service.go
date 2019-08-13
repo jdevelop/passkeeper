@@ -114,11 +114,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var pass []byte
+	var passwd []byte
 
 	for {
 		db.Log("Tap the RFID")
-		pass, err = GetCurrentPassword(rfid, raspberry)
+		passwd, err = GetCurrentPassword(rfid, raspberry)
 
 		if err != nil {
 			db.Log("Key failed, retry")
@@ -135,7 +135,7 @@ func main() {
 
 	raspberry.ReadyToTransmit()
 
-	seedStorage, err := getStorage(c.Passwords.PasswordFile, pass)
+	seedStorage, err := getStorage(c.Passwords.PasswordFile, passwd)
 
 	if err != nil {
 		db.Log("Storage failed")
@@ -229,7 +229,7 @@ func main() {
 		textDisplay.Refresh()
 	})
 
-	rest.Start("0.0.0.0", 80, seedStorage, func() {
+	rest.Start("0.0.0.0", 80, seedStorage, pass.NewPasswordGenerator(12), func() {
 		currentSeedID = 0
 		currentSeeds, err = seedStorage.ListCredentials()
 		textDisplay.Refresh()

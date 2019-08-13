@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/jdevelop/passkeeper/firmware"
+	"github.com/jdevelop/passkeeper/firmware/pass"
 	"github.com/jdevelop/passkeeper/firmware/storage"
 )
 
@@ -25,11 +26,12 @@ type storageCombined interface {
 
 type RESTServer struct {
 	credStorage storageCombined
+	passwordGen pass.PasswordGenerator
 }
 
 func corsHeaders(w http.ResponseWriter) http.ResponseWriter {
 	hdr := w.Header()
-	hdr.Set("Access-Control-Allow-Origin", "*")
+	hdr.Set("Access-Control-Allow-Origin", "10.101.1.1")
 	hdr.Set("Access-Control-Allow-Methods", "OPTIONS,GET,PUT,DELETE,POST")
 	hdr.Set("Access-Control-Allow-Headers", "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range")
 	return w
@@ -172,9 +174,24 @@ func (r *RESTServer) restoreCredentials(w http.ResponseWriter, req *http.Request
 	corsHeaders(jsonHeaders(w)).Write(restored)
 }
 
-func Start(host string, port int, s storageCombined, changeCallback func()) {
+func (r *RESTServer) generatePasswords(w http.ResponseWriter, req *http.Request) {
+	pwds, err := r.passwordGen.GeneratePassword(5)
+	if err != nil {
+		errorResp(w, "can't generate passwords", &err)
+		return
+	}
+	respJson, err := json.Marshal(pwds)
+	if err != nil {
+		errorResp(w, "can't restore stora", &err)
+		return
+	}
+	corsHeaders(jsonHeaders(w)).Write(respJson)
+}
+
+func Start(host string, port int, s storageCombined, pwdGen pass.PasswordGenerator, changeCallback func()) {
 	srv := RESTServer{
 		credStorage: s,
+		passwordGen: pwdGen,
 	}
 
 	rtr := mux.NewRouter()
@@ -194,9 +211,10 @@ func Start(host string, port int, s storageCombined, changeCallback func()) {
 	})
 
 	rtr.HandleFunc("/backup", srv.backupCredentials).Methods(http.MethodGet)
-	rtr.HandleFunc("/restore", srv.restoreCredentials).Methods(http.MethodPost)
+	rtr.HandleFunc("/restore", wrapper(srv.restoreCredentials)).Methods(http.MethodPost)
 	rtr.HandleFunc("/list", srv.listCredentials).Methods(http.MethodGet)
 	rtr.HandleFunc("/add", wrapper(srv.saveCredentials)).Methods(http.MethodPut)
+	rtr.HandleFunc("/generate", wrapper(srv.generatePasswords)).Methods(http.MethodGet)
 	rtr.HandleFunc("/{id}", wrapper(srv.loadCredentials)).Methods(http.MethodGet)
 	rtr.HandleFunc("/{id}", wrapper(srv.removeCredentials)).Methods(http.MethodDelete)
 

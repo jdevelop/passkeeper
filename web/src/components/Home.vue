@@ -49,22 +49,59 @@
           ></b-form-input>
         </b-form-group>
 
-        <b-form-group id="input-group-2" description="Password" label-for="input-2">
-          <b-alert
-            variant="danger"
-            :show="modalErrors.passwordField"
-          >{{ modalErrors.passwordField }}</b-alert>
-          <b-form-input
-            v-bind:class="{'border border-danger': modalErrors.passwordField }"
-            id="input-2"
-            type="password"
-            v-model="credentials.secret"
-            required
-            placeholder="Password"
-          ></b-form-input>
+        <b-form-group
+          id="input-group-2"
+          description="Password"
+          label-for="input-2"
+          v-show="generated.length == 0"
+        >
+          <b-row>
+            <b-col cols="10">
+              <b-alert
+                variant="danger"
+                :show="modalErrors.passwordField"
+              >{{ modalErrors.passwordField }}</b-alert>
+              <b-form-input
+                v-bind:class="{'border border-danger': modalErrors.passwordField }"
+                id="input-2"
+                type="password"
+                v-model="credentials.secret"
+                required
+                placeholder="Password"
+              ></b-form-input>
+            </b-col>
+            <b-col>
+              <b-btn size="sm" variant="success" @click="generatePasswords()">Generate</b-btn>
+            </b-col>
+          </b-row>
         </b-form-group>
 
-        <b-form-group id="input-group-3" description="Confirm password" label-for="input-3">
+        <b-form-group description="Password" v-show="generated.length > 0">
+          <b-row>
+            <b-col cols="10">
+              <b-alert
+                variant="danger"
+                :show="modalErrors.passwordField"
+              >{{ modalErrors.passwordField }}</b-alert>
+              <b-form-select
+                v-bind:class="{'border border-danger': modalErrors.passwordField }"
+                id="input-2"
+                v-model="credentials.secret"
+                :options="generated"
+              ></b-form-select>
+            </b-col>
+            <b-col>
+              <b-btn size="sm" variant="success" @click="clearPasswords()">Type in</b-btn>
+            </b-col>
+          </b-row>
+        </b-form-group>
+
+        <b-form-group
+          id="input-group-3"
+          description="Confirm password"
+          label-for="input-3"
+          v-show="generated.length == 0"
+        >
           <b-alert variant="danger" :show="modalErrors.confirmField">{{ modalErrors.confirmField }}</b-alert>
           <b-form-input
             v-bind:class="{'border border-danger': modalErrors.confirmField }"
@@ -124,6 +161,7 @@ export default {
   },
   data() {
     return {
+      generated: [],
       modalErrors: {},
       credentials: Model.Credentials(),
       fields: columnNames,
@@ -131,6 +169,17 @@ export default {
     };
   },
   methods: {
+    clearPasswords() {
+      this.credentials.secret = "";
+      this.credentials.confirm = "";
+      this.generated = [];
+    },
+    generatePasswords() {
+      const t = this;
+      REST.GeneratePasswords(function(d) {
+        t.generated = d.data;
+      });
+    },
     saveCredentials(bvModalEvt) {
       const t = this;
       t.modalErrors = {};
@@ -144,7 +193,10 @@ export default {
         bvModalEvt.preventDefault();
         return;
       }
-      if (t.credentials.secret != t.credentials.confirm) {
+      if (
+        t.generated.length == 0 &&
+        t.credentials.secret != t.credentials.confirm
+      ) {
         t.modalErrors = { confirmField: "Password mismatch" };
         bvModalEvt.preventDefault();
         return;
@@ -153,6 +205,7 @@ export default {
         t.credentials = Model.Credentials();
         REST.ListCredentials(function(data) {
           t.items = data;
+          t.generated = [];
         });
       });
     },

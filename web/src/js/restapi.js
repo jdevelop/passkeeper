@@ -1,6 +1,11 @@
 import axios from "axios";
 
 export const REST = {
+  GeneratePasswords(done) {
+    axios
+      .get(`${process.env.VUE_APP_API_URL}/generate`, {}, {})
+      .then(data => done(data));
+  },
   SaveCredentials(credentials, done) {
     axios
       .put(`${process.env.VUE_APP_API_URL}/add`, credentials, {})
