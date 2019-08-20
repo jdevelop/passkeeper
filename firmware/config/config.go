@@ -1,12 +1,13 @@
-package app
+package config
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"io/ioutil"
 	"os/user"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type leds struct {

@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jdevelop/passkeeper/firmware"
-	"github.com/jdevelop/passkeeper/firmware/app"
+	"github.com/jdevelop/passkeeper/firmware/config"
 	"github.com/jdevelop/passkeeper/firmware/device/rpi"
 	"github.com/jdevelop/passkeeper/firmware/pass"
 	"github.com/jdevelop/passkeeper/firmware/storage"
@@ -24,7 +24,7 @@ var (
 	mode = cli.Flag("mode", "Storage password source (card or manual entry)").
 		Default("card").Enum("term", "card")
 
-	config = cli.Flag("config", "Path to the config file").String()
+	configPath = cli.Flag("config", "Path to the config file").String()
 
 	listCmd = cli.Command("list", "List available passwords")
 
@@ -54,7 +54,7 @@ func main() {
 		cardAccess   [6]byte
 	)
 
-	c, err := app.LoadConfig(*config)
+	c, err := config.LoadConfig(*configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -160,7 +160,7 @@ func main() {
 			log.Fatal(err)
 		}
 		copy(c.Rfid.RfidAccessKey[:], cardAccess[:])
-		err = app.SaveConfig(*config, &c)
+		err = config.SaveConfig(*configPath, &c)
 		if err != nil {
 			log.Fatal(err)
 		}

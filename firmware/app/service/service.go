@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/jdevelop/passkeeper/firmware"
-	"github.com/jdevelop/passkeeper/firmware/app"
 	"github.com/jdevelop/passkeeper/firmware/app/service/support"
+	"github.com/jdevelop/passkeeper/firmware/config"
 	"github.com/jdevelop/passkeeper/firmware/controls/status"
 	"github.com/jdevelop/passkeeper/firmware/device/rpi"
 	"github.com/jdevelop/passkeeper/firmware/device/rpi/display"
@@ -24,8 +24,8 @@ import (
 
 var (
 	cli         = kingpin.New("service", "Passkeeper")
-	config      = cli.Flag("config", "Config path").Short('c').String()
-	displayType = cli.Flag("display", "Display").Short('d').Default("lcd").Enum("lcd", "oled")
+	configPath  = cli.Flag("config", "Config path").Short('c').String()
+	displayType = cli.Flag("display", "Display").Short('d').Default("oled").Enum("lcd", "oled")
 )
 
 var currentSeedID = 0
@@ -39,7 +39,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c, err := app.LoadConfig(*config)
+	c, err := config.LoadConfig(*configPath)
 
 	if err != nil {
 		log.Fatal(err)
@@ -229,11 +229,15 @@ func main() {
 		textDisplay.Refresh()
 	})
 
-	rest.Start("0.0.0.0", 80, seedStorage, pass.NewPasswordGenerator(12), func() {
-		currentSeedID = 0
-		currentSeeds, err = seedStorage.ListCredentials()
-		textDisplay.Refresh()
-	})
+	rest.Start("0.0.0.0", 80, seedStorage, pass.NewPasswordGenerator(12),
+		func(newKey []byte) error {
+			return rfid.ResetPassword(newKey, c.Rfid.RfidAccessSector, c.Rfid.RfidAccessBlock)
+		},
+		func() {
+			currentSeedID = 0
+			currentSeeds, err = seedStorage.ListCredentials()
+			textDisplay.Refresh()
+		})
 }
 
 func GetCurrentPassword(provider pass.PasswordProvider, board status.StatusControl) ([]byte, error) {

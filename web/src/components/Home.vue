@@ -36,6 +36,7 @@
       title="Add new credentials"
       centered
       @ok="saveCredentials"
+      @cancel="resetCredentials"
     >
       <b-form>
         <b-form-group id="input-group-1" label-for="input-1" description="Password service">
@@ -86,8 +87,10 @@
               <b-form-select
                 v-bind:class="{'border border-danger': modalErrors.passwordField }"
                 id="input-2"
+                ref="passSelect"
                 v-model="credentials.secret"
                 :options="generated"
+                text="Choose password"
               ></b-form-select>
             </b-col>
             <b-col>
@@ -169,6 +172,9 @@ export default {
     };
   },
   methods: {
+    resetCredentials() {
+      this.credentials = Model.Credentials();
+    },
     clearPasswords() {
       this.credentials.secret = "";
       this.credentials.confirm = "";

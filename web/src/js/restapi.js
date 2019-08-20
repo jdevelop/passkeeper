@@ -1,6 +1,12 @@
 import axios from "axios";
 
 export const REST = {
+  UpdateCardPassword(cardPassword, ok, fail) {
+    axios
+      .put(`${process.env.VUE_APP_API_URL}/cardpassword`, cardPassword, {})
+      .then(data => ok(data))
+      .catch(e => fail(e));
+  },
   GeneratePasswords(done) {
     axios
       .get(`${process.env.VUE_APP_API_URL}/generate`, {}, {})

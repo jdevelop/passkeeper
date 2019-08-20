@@ -26,5 +26,9 @@ func main() {
 
 	fmt.Printf("Starting REST service at http://%s:%d\n", *host, *port)
 
-	rest.Start(*host, *port, s, pass.NewPasswordGenerator(8), func() {})
+	rest.Start(*host, *port, s, pass.NewPasswordGenerator(8),
+		func(newKey []byte) error {
+			log.Printf("Updating card key to %v\n", newKey)
+			return nil
+		}, func() {})
 }

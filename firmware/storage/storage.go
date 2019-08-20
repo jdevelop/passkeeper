@@ -29,3 +29,7 @@ type CredentialsStorageBackup interface {
 type CredentialsStorageRestore interface {
 	RestoreStorage(io.Reader) error
 }
+
+type MutableKey interface {
+	UpdateKey([]byte) error
+}

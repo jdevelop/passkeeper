@@ -24,9 +24,11 @@ func NewPlainText(filename string, key []byte) (*PlainText, error) {
 	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	}
+	keyData := make([]byte, len(key))
+	copy(keyData, key)
 	return &PlainText{
 		filePath: filename,
-		key:      key,
+		key:      keyData,
 	}, nil
 }
 
@@ -52,6 +54,11 @@ func readCredentials(s *PlainText) ([]firmware.Credentials, error) {
 		return nil, err
 	}
 	return seeds, nil
+}
+
+func (s *PlainText) UpdateKey(newKey []byte) error {
+	copy(s.key, newKey)
+	return nil
 }
 
 func (s *PlainText) ReadCredentials(id string) (*firmware.Credentials, error) {
@@ -215,4 +222,5 @@ var (
 	_ CredentialsStorageRemove = &p
 	_ CredentialsStorageBackup = &p
 	_ CredentialsStorageBackup = &p
+	_ MutableKey               = &p
 )
