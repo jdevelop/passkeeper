@@ -55,16 +55,18 @@ func (r *RESTServer) setPassword(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if err := r.cardPasswordChange(block); err != nil {
-		errorResp(w, "can't update password, please try again", nil)
+		errorResp(w, "can't update password, please try again", &err)
 		return
 	}
 	if err := r.credStorage.UpdateKey(block); err != nil {
-		errorResp(w, "can't set crypto storage password, aborting", nil)
+		errorResp(w, "can't set crypto storage password, aborting", &err)
 		return
 	}
 	if err := r.credStorage.RestoreStorage(bytes.NewReader(data)); err != nil {
-		errorResp(w, "can't restore password, aborting", nil)
-		return
+		if err != storage.ZeroLengthPasswordList {
+			errorResp(w, "can't restore password, aborting", &err)
+			return
+		}
 	}
 
 	corsHeaders(jsonHeaders(w)).Write(saved)

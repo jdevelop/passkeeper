@@ -201,7 +201,7 @@ func (s *PlainText) RestoreStorage(src io.Reader) error {
 		return err
 	}
 	if len(sample) == 0 {
-		return fmt.Errorf("can't restore zero-length credentials list")
+		return ZeroLengthPasswordList
 	}
 	enc, err := encrypt(s.key, data)
 	if err != nil {

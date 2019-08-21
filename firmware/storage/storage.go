@@ -1,10 +1,13 @@
 package storage
 
 import (
+	"errors"
 	"io"
 
 	"github.com/jdevelop/passkeeper/firmware"
 )
+
+var ZeroLengthPasswordList = errors.New("can't restore zero-length passwords")
 
 type CredentialsStorageRead interface {
 	ReadCredentials(string) (*firmware.Credentials, error)

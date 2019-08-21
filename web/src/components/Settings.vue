@@ -94,11 +94,29 @@ export default {
           if (confirm) {
             REST.UpdateCardPassword(
               t.passwordUpdate,
-              ok => {
-                console.log("Success", ok);
+              () => {
+                t.$bvModal.msgBoxOk("Successfully updated!", {
+                  title: "Password update done",
+                  size: "sm",
+                  buttonSize: "lg",
+                  okVariant: "success",
+                  okTitle: "Close",
+                  headerClass: "p-2 border-bottom-0",
+                  footerClass: "p-2 border-top-0",
+                  centered: true
+                });
               },
               fail => {
-                console.log(fail);
+                t.$bvModal.msgBoxOk("Update failed", {
+                  title: fail,
+                  size: "sm",
+                  buttonSize: "lg",
+                  okVariant: "danger",
+                  okTitle: "Close",
+                  headerClass: "p-2 border-bottom-0",
+                  footerClass: "p-2 border-top-0",
+                  centered: true
+                });
               }
             );
           }
