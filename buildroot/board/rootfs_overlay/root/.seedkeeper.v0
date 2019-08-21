@@ -1,0 +1,45 @@
+{
+  "leds": {
+    "error": 19,
+    "standby": 21,
+    "ready": 20
+  },
+  "keys": {
+    "key_send": 18,
+    "key_up": 6,
+    "key_down": 5
+  },
+  "passwords": {
+    "file": "/root/seedstorage.enc"
+  },
+  "rfid": {
+    "irq_pin" : "12",
+    "reset_pin": "13",
+    "access_key": [
+      255,
+      255,
+      255,
+      255,
+      255,
+      255
+    ],
+    "access_sector": 5,
+    "access_block": 1
+  },
+  "lcd": {
+    "data": [
+      25,
+      24,
+      23,
+      22
+    ],
+    "rs_pin": 26,
+    "e_pin": 27
+  },
+  "oled": {
+    "bus_id": 1,
+    "dev_id": 60,
+    "width": 128,
+    "height": 64
+  }
+}
