@@ -16,11 +16,11 @@ type (
 
 // Example using DHCP with a single network interface device
 func StartDHCP(iface IFace, ip IP, start LeaseStart) error {
-	serverIP := net.ParseIP(string(ip))
+	serverIP := net.ParseIP(string(ip)).To4()
 	handler := &DHCPHandler{
 		ip:            serverIP,
 		leaseDuration: 2 * time.Hour,
-		start:         net.ParseIP(string(start)),
+		start:         net.ParseIP(string(start)).To4(),
 		leaseRange:    2,
 		leases:        make(map[int]lease, 2),
 		options: dhcp.Options{
