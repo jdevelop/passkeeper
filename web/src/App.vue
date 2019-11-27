@@ -1,7 +1,7 @@
 <template>
   <b-container fluid id="app" class="vh-100">
     <b-navbar type="dark" variant="dark">
-      <b-navbar-brand>PassKeeper 1.0</b-navbar-brand>
+      <b-navbar-brand>PassKeeper 2.0</b-navbar-brand>
       <b-navbar-nav small>
         <b-nav-item>
           <router-link to="/" class="menulinks" exact active-class="current-link">Dashboard</router-link>

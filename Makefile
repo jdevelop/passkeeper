@@ -1,14 +1,8 @@
-.PHONY: web firmware
-USERID ?= \\\#1000
+.PHONY: all linux
 
-all: 	web firmware
-
-firmware:
-	docker run --rm -e HOME=/tmp/dev -v $(PWD):/tmp/dev -w /tmp/dev jdevelop/passkeeperbuild:1.12-alpine /bin/sh -c 'make -C firmware clean all'
-
-web:
-	docker run --rm -u ${USERID} -v $(PWD)/web:/works -w /works -u node node:11-alpine npm install
-	docker run --rm -u ${USERID} -v $(PWD)/web:/works -w /works -u node node:11-alpine npm run build
+all:
+	docker build . -t passkeeper:local
+	docker run --rm -v `pwd`/buildroot/board/rootfs_overlay/root:/hostfs passkeeper:local /bin/sh -c "cp -R /dist/* /hostfs/"
 
 
 linux: 

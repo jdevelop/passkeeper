@@ -3,7 +3,7 @@ TOS ?= linux
 TARCH ?= arm
 
 OSBUILD=GOOS=${TOS} GOARCH=${TARCH} CGOENABLED=0
-OUT=../buildroot/board/rootfs_overlay/root
+OUT=/dist
 EXECS=service util splash
 
 PHONY: packr packr-dep
@@ -11,7 +11,7 @@ PHONY: packr packr-dep
 all: packr upx
 
 packr: packr-dep
-	packr
+	packr -v
 
 ${OUT}/service:
 	${OSBUILD} go build ${STRIP} -o ${OUT}/service app/service/*.go

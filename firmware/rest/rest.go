@@ -94,7 +94,7 @@ func Start(host string, port int, s storageCombined, pwdGen pass.PasswordGenerat
 	rtr.HandleFunc("/{id}", wrapper(srv.loadCredentials)).Methods(http.MethodGet)
 	rtr.HandleFunc("/{id}", wrapper(srv.removeCredentials)).Methods(http.MethodDelete)
 
-	box := packr.NewBox("../../web/dist/")
+	box := packr.NewBox("../../web/")
 
 	fs := http.FileServer(box)
 	rtr.PathPrefix("/").Handler(fs)
