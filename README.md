@@ -34,7 +34,6 @@ The application is written in [Golang](https://golang.org/) with heavy use of [h
 
 * [GNU Make](https://www.gnu.org/software/make/)
 * [Docker](https://www.docker.com/)
-* [buildroot](https://buildroot.org/downloads/buildroot-2018.08.2.tar.gz) version 2018.08.2 ( newer versions might work too )
 
 #### Instructions
 
@@ -45,19 +44,12 @@ The application consists of 2 components:
     * oled splash
 * web interface ( AngularJS )
 
-These components can be build separately:
-
-* `make web` - builds the web interface.
-    The application embeds the WEB interface into itself, hence `make web` has to be invoked first, in order to produce all necessary artifacts.
-* `make firmware` - builds services
-* `make all` - builds the web interface and services
-* `make linux` - builds the linux image to write on a micro SD card for Raspberry Pi. Requires path to buildrood to be set in `BUILDROOT` variable.
-
 
 ```
-make all linux BUILDROOT=%PATH/TO/BUILDROOT/HERE%
+make all
 ``` 
-will build the web interface, services and will invoke buildroot to produce the disk image in `buildroot/images/sdcard.img` file. This file can be written onto a micro SD card with 
-```
-dd if=buildroot/images/sdcard.img of=/dev/sda bs=1M
-```
+will build the web interface, services and will invoke buildroot to produce the disk image in `dist/sdcard.img.gz` file. This file can be written onto a micro SD card as `dd if=dist/sdcard.img of=/dev/sda bs=1M`
+
+# Testing
+
+Plug PassKeeper into any USB port of the computer. PassKeeper will register itself and will be accessible at http://10.101.1.1/

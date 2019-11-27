@@ -10,6 +10,11 @@ RUN apk add make upx git
 WORKDIR /build
 RUN mkdir /dist && make clean all
 
-FROM alpine:3.8
-COPY --from=builder /dist/ /dist/
+FROM jdevelop/passkeeper:buildroot-2018.08.2 as buildroot
+COPY --from=builder /dist/ /build/board/rootfs_overlay/root/
+WORKDIR /build
+RUN make O=/build PASSKEEPER=/build FORCE_UNSAFE_CONFIGURE=1 -C /buildroot/buildroot-2018.08.2
+
+FROM alpine:3.10
+COPY --from=buildroot /build/images/sdcard.img /dist/
 WORKDIR /dist
