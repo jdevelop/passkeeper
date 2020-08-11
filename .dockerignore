@@ -1,3 +1,11 @@
 .git
 .dockerignore
 kicad
+dist/
+.gitignore
+buildroot/build/
+buildroot/host/
+buildroot/images/
+buildroot/staging
+buildroot/target/
+

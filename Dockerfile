@@ -13,6 +13,8 @@ RUN mkdir /dist && make clean all
 #FROM jdevelop/passkeeper:buildroot-2018.08.2-rpi-zero-w as buildroot
 FROM jdevelop/passkeeper:buildroot-2018.08.2-rpi-zero as buildroot
 COPY --from=builder /dist/ /build/board/rootfs_overlay/root/
+COPY buildroot/.config /build/.config
+COPY buildroot/linux-config /build/linux-config
 WORKDIR /build
 RUN make O=/build PASSKEEPER=/build FORCE_UNSAFE_CONFIGURE=1 -C /buildroot/buildroot-2018.08.2 linux-rebuild
 RUN make O=/build PASSKEEPER=/build FORCE_UNSAFE_CONFIGURE=1 -C /buildroot/buildroot-2018.08.2
