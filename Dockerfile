@@ -10,9 +10,11 @@ RUN apk add make upx git
 WORKDIR /build
 RUN mkdir /dist && make clean all
 
-FROM jdevelop/passkeeper:buildroot-2018.08.2 as buildroot
+#FROM jdevelop/passkeeper:buildroot-2018.08.2-rpi-zero-w as buildroot
+FROM jdevelop/passkeeper:buildroot-2018.08.2-rpi-zero as buildroot
 COPY --from=builder /dist/ /build/board/rootfs_overlay/root/
 WORKDIR /build
+RUN make O=/build PASSKEEPER=/build FORCE_UNSAFE_CONFIGURE=1 -C /buildroot/buildroot-2018.08.2 linux-rebuild
 RUN make O=/build PASSKEEPER=/build FORCE_UNSAFE_CONFIGURE=1 -C /buildroot/buildroot-2018.08.2
 
 FROM alpine:3.10
